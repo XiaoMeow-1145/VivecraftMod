@@ -1375,7 +1375,8 @@ public class MCOpenVR extends MCVR {
             int i = VRInput_GetActionOrigins(this.getActionSetHandle(action.actionSet), action.handle, longbyreference);
 
             if (i != 0) {
-                throw new RuntimeException("Error getting action origins for '" + action.name + "': " + getInputErrorName(i));
+                VRSettings.logger.warn("Error getting action origins for '{}': {}, returning empty list", action.name, getInputErrorName(i));
+                return Collections.emptyList();
             } else {
                 List<Long> list = new ArrayList<>();
 
