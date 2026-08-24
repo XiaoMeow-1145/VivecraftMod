@@ -7,7 +7,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.vivecraft.client_vr.VRState;
 
-@Mixin(ClientBrandRetriever.class)
+@Mixin(value = ClientBrandRetriever.class, remap = false)
 public class ClientBrandRetrieverVRMixin {
     @Inject(at = @At("RETURN"), method = "getClientModName", cancellable = true)
     private static void vivecraft$vivecraftClientBrand(CallbackInfoReturnable<String> cir) {

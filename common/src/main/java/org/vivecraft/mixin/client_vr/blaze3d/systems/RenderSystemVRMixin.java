@@ -11,7 +11,7 @@ import org.vivecraft.client_vr.provider.MCVR;
 
 import static com.mojang.blaze3d.systems.RenderSystem.blendFuncSeparate;
 
-@Mixin(RenderSystem.class)
+@Mixin(value = RenderSystem.class, remap = false)
 public class RenderSystemVRMixin {
 
     // do remap because of forge

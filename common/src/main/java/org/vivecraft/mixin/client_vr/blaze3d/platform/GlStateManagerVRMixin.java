@@ -13,7 +13,7 @@ import org.vivecraft.mixin.client.blaze3d.RenderSystemAccessor;
 import static com.mojang.blaze3d.platform.GlStateManager.BLEND;
 import static com.mojang.blaze3d.platform.GlStateManager.glBlendFuncSeparate;
 
-@Mixin(GlStateManager.class)
+@Mixin(value = GlStateManager.class, remap = false)
 public class GlStateManagerVRMixin {
 
     //Change the limit of textures to 32
