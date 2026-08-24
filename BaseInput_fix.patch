@@ -1,0 +1,50 @@
+--- /tmp/OpenOVR_fix/OpenOVR/Reimpl/BaseInput.cpp.bak	2026-08-24 01:54:57.193726337 +0000
++++ /tmp/OpenOVR_fix/OpenOVR/Reimpl/BaseInput.cpp	2026-08-24 01:55:23.590525044 +0000
+@@ -2326,7 +2326,12 @@
+ 	char buff[XR_MAX_PATH_LENGTH + 1];
+ 	for (uint32_t i = 0; i < count; i++) {
+ 		uint32_t len;
+-		OOVR_FAILED_XR_ABORT(xrPathToString(xr_instance, tmp[i], XR_MAX_PATH_LENGTH, &len, buff));
++		XrResult pathResult = xrPathToString(xr_instance, tmp[i], XR_MAX_PATH_LENGTH, &len, buff);
++
++		if (XR_FAILED(pathResult)) {
++			OOVR_LOGF("GetActionOrigins: skipping unsupported path %d, error %d", i, pathResult);
++			continue;
++		}
+ 
+ 		std::string path(buff, len);
+ 		int endOfHandPos = path.find('/', strlen("/user/hand/") + 1);
+@@ -2460,9 +2465,17 @@
+ 		XrPath path = boundActionPaths.at(i);
+ 
+ 		uint32_t pathLen;
+-		OOVR_FAILED_XR_ABORT(xrPathToString(xr_instance, path, 0, &pathLen, nullptr));
++		XrResult pathResult1 = xrPathToString(xr_instance, path, 0, &pathLen, nullptr);
++		if (XR_FAILED(pathResult1)) {
++			OOVR_LOGF("GetActionBindingInfo: skipping unsupported path %zu, error %d", i, pathResult1);
++			continue;
++		}
+ 		std::vector<char> chars(pathLen);
+-		OOVR_FAILED_XR_ABORT(xrPathToString(xr_instance, path, chars.size(), &pathLen, chars.data()));
++		XrResult pathResult2 = xrPathToString(xr_instance, path, chars.size(), &pathLen, chars.data());
++		if (XR_FAILED(pathResult2)) {
++			OOVR_LOGF("GetActionBindingInfo: skipping unsupported path %zu, error %d", i, pathResult2);
++			continue;
++		}
+ 		std::string pathStr(chars.data(), chars.size());
+ 
+ 		std::vector<std::string> parts;
+@@ -2609,7 +2622,12 @@
+ 		for (int i = 0; i < (int)action->sourcesCount; i++) {
+ 			ZeroMemory(buff, sizeof(buff));
+ 			uint32_t length;
+-			OOVR_FAILED_XR_ABORT(xrPathToString(xr_instance, action->sources[i], sizeof(buff) - 1, &length, buff));
++			XrResult pathResult3 = xrPathToString(xr_instance, action->sources[i], sizeof(buff) - 1, &length, buff);
++			if (XR_FAILED(pathResult3)) {
++				OOVR_LOGF("activeOriginFromSubaction: skipping unsupported path %d, error %d", i, pathResult3);
++				action->sourceNames[i] = "";
++				continue;
++			}
+ 			action->sourceNames[i] = buff;
+ 		}
+ 
