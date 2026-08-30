@@ -1374,8 +1374,13 @@ public class MCOpenVR extends MCVR {
             var longbyreference = stack.callocLong(16);
             int i = VRInput_GetActionOrigins(this.getActionSetHandle(action.actionSet), action.handle, longbyreference);
 
+            if (i == -19) {
+               return new ArrayList<>();
+            }
+
             if (i != 0) {
-                throw new RuntimeException("Error getting action origins for '" + action.name + "': " + getInputErrorName(i));
+                throw new RuntimeException("Error
+ getting action origins for " + action.name + ": " + getInputErrorName(i));
             } else {
                 List<Long> list = new ArrayList<>();
 
