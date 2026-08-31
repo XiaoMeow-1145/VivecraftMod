@@ -1375,7 +1375,7 @@ public class MCOpenVR extends MCVR {
             int i = VRInput_GetActionOrigins(this.getActionSetHandle(action.actionSet), action.handle, longbyreference);
 
             if (i == -19) {
-               return new ArrayList<>();
+                i = 0;
             }
 
             if (i != 0) {
