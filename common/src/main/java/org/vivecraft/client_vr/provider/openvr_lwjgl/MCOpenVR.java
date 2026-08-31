@@ -1379,8 +1379,7 @@ public class MCOpenVR extends MCVR {
             }
 
             if (i != 0) {
-                throw new RuntimeException("Error
- getting action origins for " + action.name + ": " + getInputErrorName(i));
+                throw new RuntimeException("Errorgetting action origins for " + action.name + ": " + getInputErrorName(i));
             } else {
                 List<Long> list = new ArrayList<>();
 
