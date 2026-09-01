@@ -751,12 +751,65 @@ static EGLDisplay g_egl_display = EGL_NO_DISPLAY;
 static EGLConfig g_egl_config = NULL;
 static EGLContext g_egl_context = EGL_NO_CONTEXT;
 
+// JNI function: net.kdt.pojavlaunch.MCXRLoader.launch(android.app.Activity)
+// Starts the VR application by calling activity.runCraft() in a new thread
+// This matches the original libopenvr_api.so behavior
+#include <pthread.h>
+
+struct launch_thread_args {
+    JNIEnv* env;
+    jobject activity_ref;
+    jmethodID method_id;
+};
+
+static void* launch_thread_func(void* arg) {
+    struct launch_thread_args* args = (struct launch_thread_args*)arg;
+    (*args->env)->CallVoidMethod(args->env, args->activity_ref, args->method_id);
+    (*args->env)->DeleteGlobalRef(args->env, args->activity_ref);
+    free(args);
+    return NULL;
+}
+
+JNIEXPORT void JNICALL
+Java_net_kdt_pojavlaunch_MCXRLoader_launch(
+    JNIEnv* env, jclass clazz, jobject activity)
+{
+    (void)clazz;
+
+    // Create a global reference to the activity
+    jobject activityRef = (*env)->NewGlobalRef(env, activity);
+
+    // Get the activity class
+    jclass activityClass = (*env)->GetObjectClass(env, activityRef);
+
+    // Find the "runCraft" method with signature "()V"
+    jmethodID runCraftMethod = (*env)->GetMethodID(env, activityClass, "runCraft", "()V");
+
+    if (runCraftMethod == NULL) {
+        // Clean up if method not found
+        (*env)->DeleteGlobalRef(env, activityRef);
+        return;
+    }
+
+    // Create thread args
+    struct launch_thread_args* args = malloc(sizeof(struct launch_thread_args));
+    args->env = env;
+    args->activity_ref = activityRef;
+    args->method_id = runCraftMethod;
+
+    // Create a new thread to call activity.runCraft()
+    pthread_t thread;
+    pthread_create(&thread, NULL, launch_thread_func, args);
+    pthread_detach(thread);
+}
+
 // JNI function: net.kdt.pojavlaunch.MCXRLoader.setEGLGlobal(long, long, long)
 JNIEXPORT void JNICALL
-Java_net_kdt_pojavlaunch_MCXRLoader_setEGLGlobal__JJJ(
+Java_net_kdt_pojavlaunch_MCXRLoader_setEGLGlobal(
     JNIEnv* env, jclass clazz, jlong display, jlong config, jlong context)
 {
     (void)clazz;
+    (void)env;
     g_egl_display = (EGLDisplay)(intptr_t)display;
     g_egl_config = (EGLConfig)(intptr_t)config;
     g_egl_context = (EGLContext)(intptr_t)context;
@@ -775,4 +828,80 @@ Java_net_kdt_pojavlaunch_MCXRLoader_setEGLGlobal__JJJ(
     // Also set the extern variables for the old API
     OpenComposite_Android_GLES_Binding_Info = &g_android_gles_binding;
     OpenComposite_Android_Create_Info = &g_android_create_info;
+}
+
+// Also provide the mangled version with parameter signature suffix for compatibility
+JNIEXPORT void JNICALL
+Java_net_kdt_pojavlaunch_MCXRLoader_setEGLGlobal__JJJ(
+    JNIEnv* env, jclass clazz, jlong display, jlong config, jlong context)
+{
+    Java_net_kdt_pojavlaunch_MCXRLoader_setEGLGlobal(env, clazz, display, config, context);
+}
+
+
+// ============================================================
+// Additional JNI functions matching original libopenvr_api.so
+// ============================================================
+
+// Saved JavaVM pointer (set by JNI_OnLoad)
+static JavaVM* g_jvm = NULL;
+
+// JNI_OnLoad: Called when library is loaded via System.loadLibrary
+// Stores the JavaVM pointer for later use
+JNIEXPORT jint JNICALL
+JNI_OnLoad(JavaVM* vm, void* reserved)
+{
+    (void)reserved;
+    g_jvm = vm;
+
+    // Store JavaVM in the pojav_environ struct
+    g_pojav_environ.dalvikJavaVMPtr = vm;
+    g_pojav_environ.runtimeJavaVMPtr = vm;
+
+    // Store JavaVM in the android create info
+    g_android_create_info.applicationVM = vm;
+
+    return JNI_VERSION_1_4;
+}
+
+// JNI function: net.kdt.pojavlaunch.MCXRLoader.setAndroidInitInfo(android.app.Activity)
+// Sets up the Android OpenXR initialization info
+JNIEXPORT void JNICALL
+Java_net_kdt_pojavlaunch_MCXRLoader_setAndroidInitInfo(
+    JNIEnv* env, jclass clazz, jobject activity)
+{
+    (void)clazz;
+
+    // Store the activity reference
+    jobject activityRef = (*env)->NewGlobalRef(env, activity);
+    g_pojav_environ.activity = activityRef;
+
+    // Set up the Android create info for xrCreateInstance
+    g_android_create_info.type = (void*)(intptr_t)1000296000; // XR_TYPE_INSTANCE_CREATE_INFO_ANDROID_KHR
+    g_android_create_info.next = NULL;
+    g_android_create_info.createFlags = NULL;
+    g_android_create_info.applicationVM = g_jvm;
+    g_android_create_info.applicationActivity = activityRef;
+
+    // Try to initialize the OpenXR loader via xrInitializeLoaderKHR
+    // Use the xrGetInstanceProcAddr from the wrapper to find the function
+    void* initLoaderFunc = NULL;
+    XrResult res = xrGetInstanceProcAddr((XrInstance)0, "xrInitializeLoaderKHR", &initLoaderFunc);
+
+    if (res == 0 && initLoaderFunc != NULL) {
+        // Set up loader init info struct on the stack
+        // XrLoaderInitInfoAndroidKHR layout:
+        //   offset 0: type (uint64_t)
+        //   offset 8: next (void*)
+        //   offset 16: applicationVM (void*)
+        //   offset 24: applicationActivity (void*)
+        void* loaderInfo[4];
+        loaderInfo[0] = (void*)(intptr_t)1000295000; // XR_TYPE_LOADER_INIT_INFO_ANDROID_KHR
+        loaderInfo[1] = NULL;
+        loaderInfo[2] = (void*)g_jvm;
+        loaderInfo[3] = (void*)activityRef;
+
+        // Call xrInitializeLoaderKHR
+        ((XrResult (*)(void*))initLoaderFunc)(loaderInfo);
+    }
 }
