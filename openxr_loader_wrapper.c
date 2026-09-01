@@ -772,11 +772,16 @@ static void* launch_thread_func(void* arg) {
     JavaVM* jvm = args->jvm;
     JNIEnv* env = NULL;
 
+    if (jvm == NULL) {
+        free(args);
+        return NULL;
+    }
+
     // Attach this thread to the JVM to get a valid JNIEnv
     jint attach_result = (*jvm)->AttachCurrentThread(jvm, &env, NULL);
     if (attach_result != JNI_OK || env == NULL) {
+        // Clean up without using env (which is invalid)
         (*jvm)->DetachCurrentThread(jvm);
-        (*env)->DeleteGlobalRef(env, args->activity_ref);
         free(args);
         return NULL;
     }
@@ -887,11 +892,21 @@ JNI_OnLoad(JavaVM* vm, void* reserved)
 
 // JNI function: net.kdt.pojavlaunch.MCXRLoader.setAndroidInitInfo(android.app.Activity)
 // Sets up the Android OpenXR initialization info
+// Must match original libopenvr_api.so behavior exactly
 JNIEXPORT void JNICALL
 Java_net_kdt_pojavlaunch_MCXRLoader_setAndroidInitInfo(
     JNIEnv* env, jclass clazz, jobject activity)
 {
     (void)clazz;
+
+    // Get JavaVM pointer from env (like original library does)
+    JavaVM* jvm_local = NULL;
+    (*env)->GetJavaVM(env, &jvm_local);
+    if (jvm_local != NULL) {
+        g_jvm = jvm_local;
+        g_pojav_environ.dalvikJavaVMPtr = jvm_local;
+        g_pojav_environ.runtimeJavaVMPtr = jvm_local;
+    }
 
     // Store the activity reference
     jobject activityRef = (*env)->NewGlobalRef(env, activity);
