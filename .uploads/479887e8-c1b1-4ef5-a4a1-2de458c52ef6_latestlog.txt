@@ -1,0 +1,359 @@
+--------- beggining with launcher debug
+Info: Launcher version: null
+Info: LWJGL3 directory: [version, jsr305.jar, lwjgl-glfw-classes-3.2.3.jar]
+Architecture: arm64
+Info: Custom Java arguments: ""
+Info: Selected Minecraft version: 1.18.2
+Added custom env: TMPDIR=/data/user/0/net.kdt.pojavlaunch.debug/cache
+Added custom env: AWTSTUB_WIDTH=1980
+Added custom env: POJAV_NATIVEDIR=/data/app/~~b9ujF-UbqLiIoaKeh0axBg==/net.kdt.pojavlaunch.debug-NRCcrmVf3w_igmLQZ77axA==/lib/arm64
+Added custom env: LIBGL_EGL=/system/lib64/libEGL.so
+Added custom env: REGAL_GL_VERSION=4.5
+Added custom env: LIBGL_GLES=/system/lib64/libGLESv3.so
+Added custom env: REGAL_GL_VENDOR=Android
+Added custom env: LIBGL_MIPMAP=3
+Added custom env: allow_higher_compat_version=true
+Added custom env: LIBGL_SHRINK=0
+Added custom env: MESA_GLSL_CACHE_DIR=/data/user/0/net.kdt.pojavlaunch.debug/cache
+Added custom env: HOME=/storage/emulated/0/Android/data/net.kdt.pojavlaunch.debug/files/.minecraft
+Added custom env: PATH=/data/user/0/net.kdt.pojavlaunch.debug/runtimes/Internal/bin:/product/bin:/apex/com.android.runtime/bin:/apex/com.android.art/bin:/system_ext/bin:/system/bin:/system/xbin:/odm/bin:/vendor/bin:/vendor/xbin
+Added custom env: LIBGL_NOINTOVLHACK=1
+Added custom env: force_glsl_extensions_warn=true
+Added custom env: LIBGL_NORMALIZE=1
+Added custom env: LD_LIBRARY_PATH=/data/user/0/net.kdt.pojavlaunch.debug/runtimes/Internal/lib/jli:/data/user/0/net.kdt.pojavlaunch.debug/runtimes/Internal/lib:/system/lib64:/vendor/lib64:/vendor/lib64/hw:/data/app/~~b9ujF-UbqLiIoaKeh0axBg==/net.kdt.pojavlaunch.debug-NRCcrmVf3w_igmLQZ77axA==/lib/arm64
+Added custom env: POJAV_RENDERER=opengles2
+Added custom env: LIBGL_ES=2
+Added custom env: VTEST_SOCKET_NAME=/data/user/0/net.kdt.pojavlaunch.debug/cache/.virgl_test
+Added custom env: MESA_LOADER_DRIVER_OVERRIDE=zink
+Added custom env: MESA_GLSL_VERSION_OVERRIDE=460
+Added custom env: JAVA_HOME=/data/user/0/net.kdt.pojavlaunch.debug/runtimes/Internal
+Added custom env: MESA_GL_VERSION_OVERRIDE=4.6
+Added custom env: allow_glsl_extension_directive_midshader=true
+Added custom env: REGAL_GL_RENDERER=Regal
+Added custom env: AWTSTUB_HEIGHT=1080
+--------- beginning of main
+I/LIBGL   (24572): Initialising gl4es
+I/LIBGL   (24572): v1.1.4 built on Aug 16 2022 09:39:14
+I/LIBGL   (24572): Using GLES 2.0 backend
+I/LIBGL   (24572): LIBGL:loaded: /system/lib64/libGLESv3.so
+I/LIBGL   (24572): LIBGL:loaded: /system/lib64/libEGL.so
+I/LIBGL   (24572): Using GLES 2.0 backend
+
+I/LIBGL   (24572): Hardware Full NPOT detected and used
+I/LIBGL   (24572): FBO are in core, and so used
+I/LIBGL   (24572): PointSprite are in core, and so used
+I/LIBGL   (24572): CubeMap are in core, and so used
+I/LIBGL   (24572): BlendColor is in core, and so used
+I/LIBGL   (24572): Blend Substract is in core, and so used
+I/LIBGL   (24572): Blend Function and Equation Separation is in core, and so used
+I/LIBGL   (24572): Texture Mirrored Repeat is in core, and so used
+
+I/LIBGL   (24572): Extension GL_OES_element_index_uint  detected and used
+
+I/LIBGL   (24572): Extension GL_OES_packed_depth_stencil  detected and used
+I/LIBGL   (24572): Extension GL_OES_depth24  detected and used
+I/LIBGL   (24572): Extension GL_OES_rgb8_rgba8  detected and used
+I/LIBGL   (24572): Extension GL_EXT_texture_format_BGRA8888  detected and used
+I/LIBGL   (24572): Extension GL_OES_depth_texture  detected and used
+I/LIBGL   (24572): Extension GL_OES_texture_stencil8  detected and used
+I/LIBGL   (24572): Extension GL_OES_texture_float  detected and used
+I/LIBGL   (24572): Extension GL_OES_texture_half_float  detected and used
+I/LIBGL   (24572): Extension GL_EXT_color_buffer_float  detected and used
+I/LIBGL   (24572): Extension GL_EXT_color_buffer_half_float  detected and used
+I/LIBGL   (24572): high precision float in fragment shader available and used
+I/LIBGL   (24572): Max vertex attrib: 32
+I/LIBGL   (24572): Extension GL_OES_standard_derivatives  detected and used
+I/LIBGL   (24572): Max texture size: 16384
+I/LIBGL   (24572): Max Varying Vector: 31
+I/LIBGL   (24572): Text
+ure Units: 16/16 (hardware: 16), Max lights: 8, Max planes: 6
+I/LIBGL   (24572): Extension GL_EXT_texture_filter_anisotropic  detected and used
+I/LIBGL   (24572): Max Anisotropic filtering: 16
+I/LIBGL   (24572): Hardware vendor is Qualcomm
+
+I/LIBGL   (24572): GLSL 300 es supported
+I/LIBGL   (24572): GLSL 310 es supported and used
+I/LIBGL   (24572): GLSL 320 es supported
+I/LIBGL   (24572): Max Color Attachments: 8 / Draw buffers: 8
+I/LIBGL   (24572): sRGB surface supported
+I/LIBGL   (24572): EGLImage to Texture2D supported
+I/LIBGL   (24572): EGLImage to RenderBuffer supported
+I/LIBGL   (24572): ignore MipMap
+I/LIBGL   (24572): Targeting OpenGL 2.1
+I/LIBGL   (24572): No hack in shader converter to define overloaded function with int
+I/LIBGL   (24572): NPOT texture handled in hardware
+I/LIBGL   (24572): Not trying to batch small subsequent glDrawXXXX
+I/LIBGL   (24572): try to use VBO
+I/LIBGL   (24572): glX Will try to recycle EGL Surface
+I/LIBGL   (24572): Current folder is:/
+I/jrelog  (24572): dlopen libgl4es_114.so success
+
+I/jrelog  (24572): dlopen /data/user/0/net.kdt.pojavlaunch.debug/runtimes/Internal/lib/libjli.so success
+
+I/jrelog  (24572): dlopen libjvm.so failed: dlopen failed: library "libjvm.so" not found
+
+I/jrelog  (24572): dlopen /data/user/0/net.kdt.pojavlaunch.debug/runtimes/Internal/lib/server/libjvm.so success
+
+I/jrelog  (24572): dlopen /data/user/0/net.kdt.pojavlaunch.debug/runtimes/Internal/lib/libverify.so success
+
+I/jrelog  (24572): dlopen /data/user/0/net.kdt.pojavlaunch.debug/runtimes/Internal/lib/libjava.so success
+
+I/jrelog  (24572): dlopen /data/user/0/net.kdt.pojavlaunch.debug/runtimes/Internal/lib/libnet.so success
+I/jrelog  (24572): dlopen /data/user/0/net.kdt.pojavlaunch.debug/runtimes/Internal/lib/libnio.so success
+I/jrelog  (24572): dlopen /data/user/0/net.kdt.pojavlaunch.debug/runtimes/Internal/lib/libawt.so success
+I/jrelog  (24572): dlopen /data/user/0/net.kdt.pojavlaunch.debug/runtimes/Internal/lib/libawt_headless.so success
+
+I/jrelog  (24572): dlopen /data/user/0/net.kdt.pojavlaunch.debug/runtimes/Internal/lib/libfreetype.so success
+
+I/jrelog  (24572): dlopen /data/user/0/net.kdt.pojavlaunch.debug/runtimes/Internal/lib/libfontmanager.so success
+
+I/jrelog  (24572): dlopen /data/user/0/net.kdt.pojavlaunch.debug/runtimes/Internal/lib/libjaas.so success
+
+I/jrelog  (24572): dlopen /data/user/0/net.kdt.pojavlaunch.debug/runtimes/Internal/lib/libfreetype.so success
+
+I/jrelog  (24572): dlopen /data/user/0/net.kdt.pojavlaunch.debug/runtimes/Internal/lib/libawt_xawt.so success
+
+I/jrelog  (24572): dlopen /data/user/0/net.kdt.pojavlaunch.debug/runtimes/Internal/lib/libmlib_image.so success
+
+I/jrelog  (24572): dlopen /data/user/0/net.kdt.pojavlaunch.debug/runtimes/Internal/lib/libjavajpeg.so success
+
+I/jrelog  (24572): dlopen /data/user/0/net.kdt.pojavlaunch.debug/runtimes/Internal/lib/liblcms.so success
+
+I/jrelog  (24572): dlopen /data/user/0/net.kdt.pojavlaunch.debug/runtimes/Internal/lib/libjdwp.so success
+I/jrelog  (24572): dlopen /data/user/0/net.kdt.pojavlaunch.debug/runtimes/Internal/lib/libawt_headless.so success
+I/jrelog  (24572): dlopen /data/user/0/net.kdt.pojavlaunch.debug/runtimes/Internal/lib/libjsig.so success
+I/jrelog  (24572): dlopen /data/user/0/net.kdt.pojavlaunch.debug/runtimes/Internal/lib/libnet.so success
+I/jrelog  (24572): dlopen /data/user/0/net.kdt.pojavlaunch.debug/runtimes/Internal/lib/libzip.so success
+
+I/jrelog  (24572): dlopen /data/user/0/net.kdt.pojavlaunch.debug/runtimes/Internal/lib/libawt.so success
+I/jrelog  (24572): dlopen /data/user/0/net.kdt.pojavlaunch.debug/runtimes/Internal/lib/libjli.so success
+
+I/jrelog  (24572): dlopen /data/user/0/net.kdt.pojavlaunch.debug/runtimes/Internal/lib/libmanagement_ext.so success
+I/jrelog  (24572): dlopen /data/user/0/net.kdt.pojavlaunch.debug/runtimes/Internal/lib/libjawt.so success
+I/jrelog  (24572): dlopen /data/user/0/net.kdt.pojavlaunch.debug/runtimes/Internal/lib/libnio.so success
+I/jrelog  (24572): dlopen /data/user/0/net.kdt.pojavlaunch.debug/runtimes/Internal/lib/server/libjvm.so success
+I/jrelog  (24572): dlopen /data/user/0/net.kdt.pojavlaunch.debug/runtimes/Internal/lib/server/libjsig.so success
+I/jrelog  (24572): dlopen /data/user/0/net.kdt.pojavlaunch.debug/runtimes/Internal/lib/libverify.so success
+
+I/jrelog  (24572): dlopen /data/user/0/net.kdt.pojavlaunch.debug/runtimes/Internal/lib/libsctp.so success
+I/jrelog  (24572): dlopen /data/user/0/net.kdt.pojavlaunch.debug/runtimes/Internal/lib/libjimage.so success
+I/jrelog  (24572): dlopen /data/user/0/net.kdt.pojavlaunch.debug/runtimes/Internal/lib/librmi.so success
+
+I/jrelog  (24572): dlopen /data/user/0/net.kdt.pojavlaunch.debug/runtimes/Internal/lib/libj2gss.so success
+I/jrelog  (24572): dlopen /data/user/0/net.kdt.pojavlaunch.debug/runtimes/Internal/lib/libextnet.so success
+
+I/jrelog  (24572): dlopen /data/user/0/net.kdt.pojavlaunch.debug/runtimes/Internal/lib/libmanagement_agent.so success
+
+I/jrelog  (24572): dlopen /data/user/0/net.kdt.pojavlaunch.debug/runtimes/Internal/lib/libdt_socket.so success
+I/jrelog  (24572): dlopen /data/user/0/net.kdt.pojavlaunch.debug/runtimes/Internal/lib/libsyslookup.so success
+
+I/jrelog  (24572): dlopen /data/user/0/net.kdt.pojavlaunch.debug/runtimes/Internal/lib/libj2pkcs11.so success
+I/jrelog  (24572): dlopen /data/user/0/net.kdt.pojavlaunch.debug/runtimes/Internal/lib/libinstrument.so success
+
+I/jrelog  (24572): dlopen /data/user/0/net.kdt.pojavlaunch.debug/runtimes/Internal/lib/libjava.so success
+
+I/jrelog  (24572): dlopen /data/user/0/net.kdt.pojavlaunch.debug/runtimes/Internal/lib/libfontmanager.so success
+I/jrelog  (24572): dlopen /data/user/0/net.kdt.pojavlaunch.debug/runtimes/Internal/lib/libprefs.so success
+
+I/jrelog  (24572): dlopen /data/user/0/net.kdt.pojavlaunch.debug/runtimes/Internal/lib/libmanagement.so success
+
+I/jrelog  (24572): dlopen /data/app/~~b9ujF-UbqLiIoaKeh0axBg==/net.kdt.pojavlaunch.debug-NRCcrmVf3w_igmLQZ77axA==/lib/arm64/libopenal.so success
+
+I/jrelog  (24572): Done processing args
+I/jrelog  (24572): Found JLI lib
+I/jrelog  (24572): Calling JLI_Launch
+
+  <log4j:Event logger="FabricLoader/GameProvider" timestamp="1788278316537" level="INFO" thread="main">
+    <log4j:Message><![CDATA[Loading Minecraft 1.18.2 with Fabric Loader 0.19.3]]></log4j:Message>
+  </log4j:Event>
+  <log4j:Event logger="FabricLoader" timestamp="1788278316784" level="INFO" thread="main">
+    <log4j:Message><![CDATA[Loading 62 mods:
+	- fabric-api 0.77.0+1.18.2
+	   |-- fabric-api-base 0.4.5+64b7c69360
+	   |-- fabric-api-lookup-api-v1 1.6.3+2373a54560
+	   |-- fabric-biome-api-v1 8.0.7+e83becad60
+	   |-- fabric-block-api-v1 1.0.0+ee3621fc60
+	   |-- fabric-blockrenderlayer-v1 1.1.13+3ac43d9560
+	   |-- fabric-command-api-v1 1.1.10+d7c144a860
+	   |-- fabric-commands-v0 0.2.9+b4f4f6cd60
+	   |-- fabric-containers-v0 0.1.24+d7c144a860
+	   |-- fabric-content-registries-v0 3.1.3+c85f2e3860
+	   |-- fabric-convention-tags-v1 1.1.0+43ce63a460
+	   |-- fabric-crash-report-info-v1 0.2.1+ee261a3e60
+	   |-- fabric-data-generation-api-v1 3.1.0+6c70b68e60
+	   |-- fabric-dimensions-v1 2.1.21+489d6f8260
+	   |-- fabric-entity-events-v1 1.4.9+d7c144a860
+	   |-- fabric-events-interaction-v0 0.4.20+d7c144a860
+	   |-- fabric-events-lifecycle-v0 0.2.22+d7c144a860
+	   |-- fabric-game-rule-api-v1 1.0.13+d7c144a860
+	   |-- fabric-item-api-v1 1.6.2+8165403660
+	   |-- fabric-item-groups-v0 0.3.16+91896a4960
+	   |-- fabric-key-binding-api-v1 1.0.12+54e5b2ec60
+	   |-- fabric-keybindings-v0 0.2.10+b4f4f6cd60
+	   |-- fabric-lifecycle-events-v1 2.1.1+cc71601c60
+	   |-- fabric-loot-api-v2 1.1.2+1997ad1260
+	   |-- fabric-loot-tables-v1 1.1.4+e747827960
+	   |-- fabric-mining-level-api-v1 2.1.6+cc71601c60
+	   |-- fabric-models-v0 0.3.7+d7c144a860
+	   |-- fabric-networking-api-v1 1.0.24+2d30af4b60
+	   |-- fabric-networking-v0 0.3.11+b4f4f6cd60
+	   |-- fabric-object-builder-api-v1 2.1.5+032c981d60
+	   |-- fabric-particles-v1 0.2.13+526dc1ac60
+	   |-- fabric-registry-sync-v0 0.9.12+bb2e047760
+	   |-- fabric-renderer-api-v1 0.5.0+bf48649860
+	   |-- fabric-renderer-indigo 0.6.1+03e2b68760
+	   |-- fabric-renderer-registries-v1 3.2.13+b4f4f6cd60
+	   |-- fabric-rendering-data-attachment-v1 0.3.9+ee3621fc60
+	   |-- fabric-rendering-fluids-v1 2.0.3+54e5b2ec60
+	   |-- fabric-rendering-v0 1.1.15+b4f4f6cd60
+	   |-- fabric-rendering-v1 1.11.0+b7f3cf3460
+	   |-- 
+fabric-resource-conditions-api-v1 2.0.3+91b7aa6660
+	   |-- fabric-resource-loader-v0 0.5.3+047a5ecb60
+	   |-- fabric-screen-api-v1 1.0.11+d882b91560
+	   |-- fabric-screen-handler-api-v1 1.2.3+1f6558e860
+	   |-- fabric-textures-v0 1.0.13+3ac43d9560
+	   |-- fabric-transfer-api-v1 1.6.4+f4563ac860
+	   \-- fabric-transitive-access-wideners-v1 1.1.0+e747827960
+	- fabricloader 0.19.3
+	   \-- mixinextras 0.5.4
+	- ferritecore 4.2.1
+	- immediatelyfast 1.1.12
+	   \-- net_lenni0451_reflect 1.1.0
+	- java 22
+	- lazydfu 0.1.2
+	- lithium 0.10.3
+	- malilib 0.12.1
+	- minecraft 1.18.2
+	- modmenu 3.2.5
+	- smoothboot 1.18.2-1.7.0
+	- sodium 0.4.1+build.15
+	   \-- org_joml_joml 1.10.2
+	- tweakeroo 0.13.3
+	- vivecraft 1.18.2-0.0.13]]></log4j:Message>
+  </log4j:Event>
+  <log4j:Event logger="FabricLoader/Mixin" timestamp="1788278316923" level="INFO" thread="main">
+    <log4j:Message><![CDATA[SpongePowered MIXIN Subsystem Version=0.8.7 Source=file:/storage/emulated/0/Android/data/net.kdt.pojavlaunch.debug/files/.minecraft/libraries/net/fabricmc/sponge-mixin/0.17.3+mixin.0.8.7/sponge-mixin-0.17.3+mixin.0.8.7.jar Service=Knot/Fabric Env=CLIENT]]></log4j:Message>
+  </log4j:Event>
+  <log4j:Event logger="FabricLoader/Mixin" timestamp="1788278317053" level="INFO" thread="main">
+    <log4j:Message><![CDATA[Compatibility level set to JAVA_16]]></log4j:Message>
+  </log4j:Event>
+  <log4j:Event logger="FabricLoader/Mixin" timestamp="1788278317062" level="INFO" thread="main">
+    <log4j:Message><![CDATA[Compatibility level set to JAVA_17]]></log4j:Message>
+  </log4j:Event>
+  <log4j:Event logger="Lithium" timestamp="1788278317402" level="INFO" thread="main">
+    <log4j:Message><![CDATA[Loaded configuration file for Lithium: 105 options available, 1 override(s) found]]></log4j:Message>
+  </log4j:Event>
+  <log4j:Event logger="Sodium" timestamp="1788278317510" level="INFO" thread="main">
+    <log4j:Message><![CDATA[Loaded configuration file for Sodium: 29 options available, 1 override(s) found]]></log4j:Message>
+  </log4j:Event>
+  <log4j:Event logger="FabricLoader/Mixin" timestamp="1788278318070" level="WARN" thread="main">
+    <log4j:Message><![CDATA[Error loading class: nukeduck/armorchroma/GuiArmor (java.lang.ClassNotFoundException: nukeduck/armorchroma/GuiArmor)]]></log4j:Message>
+  </log4j:Event>
+  <log4j:Event logger="Lithium" timestamp="1788278318087" level="WARN" thread="main">
+    <log4j:Message><![CDATA[Force-disabling mixin 'alloc.blockstate.StateMixin' as rule 'mixin.alloc.blockstate' (added by mods [ferritecore]) disables it and children]]></log4j:Message>
+  </log4j:Event>
+  <log4j:Event logger="Sodium" timestamp="1788278318260" level="WARN" thread="main">
+    <log4j:Message><![CDATA[Force-disabling mixin 'features.chunk_rendering.MixinChunkBuilder' as rule 'mixin.features.chunk_rendering' (added by user configuration) disables it and children]]></log4j:Message>
+  </log4j:Event>
+  <log4j:Event logger="Sodium" timestamp="1788278318260" level="WARN" thread="main">
+    <log4j:Message><![CDATA[Force-disabling mixin 'features.chunk_rendering.MixinClientChunkMap' as rule 'mixin.features.chunk_rendering' (added by user configuration) disables it and children]]></log4j:Message>
+  </log4j:Event>
+  <log4j:Event logger="Sodium" timestamp="1788278318261" level="WARN" thread="main">
+    <log4j:Message><![CDATA[Force-disabling mixin 'features.chunk_rendering.MixinClientPlayNetworkHandler' as rule 'mixin.features.chunk_rendering' (added by user configuration) disables it and children]]></log4j:Message>
+  </log4j:Event>
+  <log4j:Event logger="Sodium" timestamp="1788278318262" level="WARN" thread="main">
+    <log4j:Message><![CDATA[Force-disabling mixin 'features.chunk_rendering.MixinClientWorld' as rule 'mixin.features.chunk_rendering' (added by user configuration) disables it and children]]></log4j:Message>
+  </log4j:Event>
+  <log4j:Event logger="Sodium" timestamp="1788278318262" level="WARN" thread="main">
+    <log4j:Message><![CDATA[Force-disabling mixin 'features.chunk_rendering.MixinPackedIntegerArray' as rule 'mixin.features.chunk_rendering' (added by user configuration) disables it and children]]></log4j:Message>
+  </log4j:Event>
+  <log4j:Event logger="Sodium" timestamp="1788278318263" level="WARN" thread="main">
+    <log4j:Message><![CDATA[Force-disabling mixin 'features.chunk_rendering.MixinPalettedContainer' as rule 'mixin.features.chunk_rendering' (added by user configuration) disables it and children]]></log4j:Message>
+  </log4j:Event>
+  <log4j:Event logger="Sodium" timestamp="1788278318264" level="WARN" thread="main">
+    <log4j:Message><![CDATA[Force-disabling mixin 'features.chunk_rendering.MixinWorldRenderer' as rule 'mixin.features.chunk_rendering' (added by user configuration) disables it and children]]></log4j:Message>
+  </log4j:Event>
+  <log4j:Event logger="FabricLoader/Mixin" timestamp="1788278318419" level="WARN" thread="main">
+    <log4j:Message><![CDATA[Error loading class: net/coderbot/iris/compat/sodium/impl/shader_overrides/IrisChunkProgramOverrides (java.lang.ClassNotFoundException: net/coderbot/iris/compat/sodium/impl/shader_overrides/IrisChunkProgramOverrides)]]></log4j:Message>
+  </log4j:Event>
+  <log4j:Event logger="FabricLoader/Mixin" timestamp="1788278318420" level="WARN" thread="main">
+    <log4j:Message><![CDATA[@Mixin target net.coderbot.iris.compat.sodium.impl.shader_overrides.IrisChunkProgramOverrides was not found vivecraft.iris.mixins.json:IrisChunkProgramOverridesMixin from mod vivecraft]]></log4j:Message>
+  </log4j:Event>
+  <log4j:Event logger="FabricLoader/Mixin" timestamp="1788278318420" level="WARN" thread="main">
+    <log4j:Message><![CDATA[Error loading class: net/coderbot/iris/pipeline/HandRenderer (java.lang.ClassNotFoundException: net/coderbot/iris/pipeline/HandRenderer)]]></log4j:Message>
+  </log4j:Event>
+  <log4j:Event logger="FabricLoader/Mixin" timestamp="1788278318421" level="WARN" thread="main">
+    <log4j:Message><![CDATA[Error loading class: net/coderbot/iris/pipeline/newshader/NewWorldRenderingPipeline (java.lang.ClassNotFoundException: net/coderbot/iris/pipeline/newshader/NewWorldRenderingPipeline)]]></log4j:Message>
+  </log4j:Event>
+  <log4j:Event logger="FabricLoader/Mixin" timestamp="1788278318421" level="WARN" thread="main">
+    <log4j:Message><![CDATA[Error loading class: net/coderbot/iris/uniforms/SystemTimeUniforms$FrameCounter (java.lang.ClassNotFoundException: net/coderbot/iris/uniforms/SystemTimeUniforms$FrameCounter)]]></log4j:Message>
+  </log4j:Event>
+  <log4j:Event logger="FabricLoader/Mixin" timestamp="1788278318421" level="WARN" thread="main">
+    <log4j:Message><![CDATA[Error loading class: net/coderbot/iris/uniforms/SystemTimeUniforms$Timer (java.lang.ClassNotFoundException: net/coderbot/iris/uniforms/SystemTimeUniforms$Timer)]]></log4j:Message>
+  </log4j:Event>
+  <log4j:Event logger="FabricLoader/Mixin" timestamp="1788278318421" level="WARN" thread="main">
+    <log4j:Message><![CDATA[Error loading class: net/coderbot/iris/shadow/ShadowMatrices (java.lang.ClassNotFoundException: net/coderbot/iris/shadow/ShadowMatrices)]]></log4j:Message>
+  </log4j:Event>
+  <log4j:Event logger="FabricLoader/Mixin" timestamp="1788278318421" level="WARN" thread="main">
+    <log4j:Message><![CDATA[Error loading class: net/coderbot/iris/shadows/ShadowMatrices (java.lang.ClassNotFoundException: net/coderbot/iris/shadows/ShadowMatrices)]]></log4j:Message>
+  </log4j:Event>
+  <log4j:Event logger="FabricLoader/Mixin" timestamp="1788278318422" level="WARN" thread="main">
+    <log4j:Message><![CDATA[Error
+ loading class: net/coderbot/iris/pipeline/ShadowRenderer (java.lang.ClassNotFoundException: net/coderbot/iris/pipeline/ShadowRenderer)]]></log4j:Message>
+  </log4j:Event>
+  <log4j:Event logger="FabricLoader/Mixin" timestamp="1788278318422" level="WARN" thread="main">
+    <log4j:Message><![CDATA[Error loading class: net/coderbot/iris/pipeline/PipelineManager (java.lang.ClassNotFoundException: net/coderbot/iris/pipeline/PipelineManager)]]></log4j:Message>
+  </log4j:Event>
+  <log4j:Event logger="FabricLoader/Mixin" timestamp="1788278318422" level="WARN" thread="main">
+    <log4j:Message><![CDATA[Error loading class: net/coderbot/iris/gl/program/ProgramUniforms (java.lang.ClassNotFoundException: net/coderbot/iris/gl/program/ProgramUniforms)]]></log4j:Message>
+  </log4j:Event>
+  <log4j:Event logger="FabricLoader/Mixin" timestamp="1788278318423" level="WARN" thread="main">
+    <log4j:Message><![CDATA[Error loading class: me/shedaniel/rei/impl/client/gui/widget/basewidgets/TextFieldWidget (java.lang.ClassNotFoundException: me/shedaniel/rei/impl/client/gui/widget/basewidgets/TextFieldWidget)]]></log4j:Message>
+  </log4j:Event>
+  <log4j:Event logger="FabricLoader/MixinExtras|Service" timestamp="1788278318633" level="INFO" thread="main">
+    <log4j:Message><![CDATA[Initializing MixinExtras via com.llamalad7.mixinextras.service.MixinExtrasServiceImpl(version=0.5.4).]]></log4j:Message>
+  </log4j:Event>
+  <log4j:Event logger="Smooth Boot" timestamp="1788278318763" level="INFO" thread="main">
+    <log4j:Message><![CDATA[Smooth Boot config initialized]]></log4j:Message>
+  </log4j:Event>
+  <log4j:Event logger="net.minecraft.class_2983" timestamp="1788278323478" level="INFO" thread="Render thread">
+    <log4j:Message><![CDATA[[STDERR]: [LWJGL] Failed to load a library. Possible solutions:
+	a) Add the directory that contains the shared library to -Djava.library.path or -Dorg.lwjgl.librarypath.
+	b) Add the JAR that contains the shared library to the classpath.]]></log4j:Message>
+  </log4j:Event>
+  <log4j:Event logger="net.minecraft.class_2983" timestamp="1788278323478" level="INFO" thread="Render thread">
+    <log4j:Message><![CDATA[[STDERR]: [LWJGL] Enable debug mode with -Dorg.lwjgl.util.Debug=true for better diagnostics.]]></log4j:Message>
+  </log4j:Event>
+  <log4j:Event logger="net.minecraft.class_2983" timestamp="1788278323478" level="INFO" thread="Render thread">
+    <log4j:Message><![CDATA[[STDERR]: [LWJGL] Enable the SharedLibraryLoader debug mode with -Dorg.lwjgl.util.DebugLoader=true for better diagnostics.]]></log4j:Message>
+  </log4j:Event>
+  <log4j:Event logger="com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService" timestamp="1788278323856" level="INFO" thread="Render thread">
+    <log4j:Message><![CDATA[Environment: authHost='https://authserver.mojang.com', accountsHost='https://api.mojang.com', sessionHost='https://sessionserver.mojang.com', servicesHost='https://api.minecraftservices.com', name='PROD']]></log4j:Message>
+  </log4j:Event>
+  <log4j:Event logger="net.minecraft.class_310" timestamp="1788278325505" level="INFO" thread="Render thread">
+    <log4j:Message><![CDATA[Setting user: bilibiliSmallMe]]></log4j:Message>
+  </log4j:Event>
+  <log4j:Event logger="net.fabricmc.fabric.impl.client.indigo.Indigo" timestamp="1788278325709" level="INFO" thread="Render thread">
+    <log4j:Message><![CDATA[[Indigo] Different rendering plugin detected; not applying Indigo.]]></log4j:Message>
+  </log4j:Event>
+  <log4j:Event logger="ImmediatelyFast" timestamp="1788278325716" level="INFO" thread="Render thread">
+    <log4j:Message><![CDATA[Loading ImmediatelyFast 1.1.12]]></log4j:Message>
+  </log4j:Event>
+  <log4j:Event logger="net.minecraft.class_310" timestamp="1788278326004" level="INFO" thread="Render thread">
+    <log4j:Message><![CDATA[Backend library: LWJGL version 3.2.3 SNAPSHOT]]></log4j:Message>
+  </log4j:Event>
+DlLoader: using external 
+EGLBridge: Initializing
+Created pbuffersurface
+EGLBridge: Initialized!
+EGLBridge: ThreadID=24778
+EGLBridge: EGLDisplay=0xb4000079aa3d9b40, EGLSurface=0x78e702bf00
+EGLBridge: Created CTX pointer = 0x78e732f480
+EGLBridge: Comparing: thr=24778, this=0x78e732f480, curr=0x0
+EGLBridge: Making current on window 0x78e732f480 on thread 24778
+EGLBridge: eglMakeCurrent() succeed!
+  <log4j:Event logger="net.minecraft.class_2983" timestamp="1788278326052" level="INFO" thread="Render thread">
+    <log4j:Message><![CDATA[[STDERR]: [LWJGL] [ThreadLocalUtil] Unsupported JNI version detected, this may result in a crash. Please inform LWJGL developers.]]></log4j:Message>
+  </log4j:Event>
+EGLBridge: Comparing: thr=24778, this=0x78e732f480, curr=0x78e732f480
