@@ -14,7 +14,8 @@ target_include_directories(openvr_api PRIVATE
     ${CMAKE_SYSROOT}/usr/include
 )
 
-# Link required Android libraries
+# Link required libraries
+# Note: libopenxr_loader.so is loaded at runtime via dlopen, not linked directly
 target_link_libraries(openvr_api PRIVATE
     EGL
     log

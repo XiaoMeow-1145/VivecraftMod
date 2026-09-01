@@ -1,6 +1,7 @@
-// OpenXR Loader Wrapper for Android
-// Provides all xr* symbols by loading libopenxr_loader.so at runtime via dlopen/dlsym
-// This allows the .so to be loaded by the Android linker without unresolved symbols.
+// OpenXR Loader Wrapper for Android (Runtime Dynamic Loading)
+// Provides JNI bridge functions for PojavLauncher MCXRLoader
+// Loads libopenxr_loader.so at runtime via dlopen/dlsym
+// All xr* functions are exported as wrapper functions that call dlsym-resolved pointers
 
 #include <dlfcn.h>
 #include <stdint.h>
@@ -8,12 +9,18 @@
 #include <stdlib.h>
 #include <string.h>
 #include <android/log.h>
+#include <pthread.h>
+#include <jni.h>
+#include <EGL/egl.h>
+#include <EGL/eglext.h>
 
 #define LOG_TAG "OpenXR-Wrapper"
 #define LOGD(...) __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, __VA_ARGS__)
 #define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
 
-// OpenXR types (minimal subset needed for function signatures)
+// ============================================================
+// OpenXR types (minimal subset)
+// ============================================================
 typedef uint64_t XrInstance;
 typedef uint64_t XrSession;
 typedef uint64_t XrSpace;
@@ -21,19 +28,11 @@ typedef uint64_t XrAction;
 typedef uint64_t XrActionSet;
 typedef uint64_t XrSwapchain;
 typedef uint64_t XrPath;
-typedef uint64_t XrActionSpace;
+typedef uint64_t XrTime;
 typedef uint32_t XrResult;
-typedef uint32_t XrTime;
 typedef uint32_t XrViewConfigurationType;
 typedef uint32_t XrReferenceSpaceType;
 
-
-
-// Android extern variables - provide default NULL values
-// These are set by the application at runtime
-#include <stddef.h>
-
-// Minimal OpenXR types for Android
 typedef struct XrInstanceCreateInfoAndroidKHR {
     void* type;
     const void* next;
@@ -50,699 +49,225 @@ typedef struct XrGraphicsBindingOpenGLESAndroidKHR {
     void* context;
 } XrGraphicsBindingOpenGLESAndroidKHR;
 
-// Default NULL values (application must set these at runtime)
+// ============================================================
+// OpenXR loader handle and function pointer table
+// ============================================================
+static void* g_openxr_handle = NULL;
+
+// Macro to declare a function pointer type and a static pointer
+#define XR_FUNC_DECL(ret, name, ...) \
+    typedef ret (*name##_fn)(__VA_ARGS__); \
+    static name##_fn g_##name = NULL;
+
+// Declare all xr* function pointers
+XR_FUNC_DECL(XrResult, xrGetInstanceProcAddr, XrInstance, const char*, void**)
+XR_FUNC_DECL(XrResult, xrCreateInstance, const void*, void*)
+XR_FUNC_DECL(XrResult, xrDestroyInstance, XrInstance)
+XR_FUNC_DECL(XrResult, xrEnumerateApiLayerProperties, uint32_t, uint32_t*, void*)
+XR_FUNC_DECL(XrResult, xrEnumerateInstanceExtensionProperties, const char*, uint32_t, uint32_t*, void*)
+XR_FUNC_DECL(XrResult, xrGetSystem, XrInstance, const void*, void*)
+XR_FUNC_DECL(XrResult, xrGetSystemProperties, XrInstance, uint64_t, void*)
+XR_FUNC_DECL(XrResult, xrCreateSession, XrInstance, const void*, void*)
+XR_FUNC_DECL(XrResult, xrDestroySession, XrSession)
+XR_FUNC_DECL(XrResult, xrBeginSession, XrSession, const void*)
+XR_FUNC_DECL(XrResult, xrEndSession, XrSession)
+XR_FUNC_DECL(XrResult, xrRequestExitSession, XrSession)
+XR_FUNC_DECL(XrResult, xrWaitFrame, XrSession, const void*, void*)
+XR_FUNC_DECL(XrResult, xrBeginFrame, XrSession, const void*)
+XR_FUNC_DECL(XrResult, xrEndFrame, XrSession, const void*)
+XR_FUNC_DECL(XrResult, xrCreateReferenceSpace, XrSession, const void*, void*)
+XR_FUNC_DECL(XrResult, xrDestroySpace, XrSpace)
+XR_FUNC_DECL(XrResult, xrLocateSpace, XrSpace, XrSpace, XrTime, void*)
+XR_FUNC_DECL(XrResult, xrCreateActionSet, XrInstance, const void*, void*)
+XR_FUNC_DECL(XrResult, xrDestroyActionSet, XrActionSet)
+XR_FUNC_DECL(XrResult, xrCreateAction, XrActionSet, const void*, void*)
+XR_FUNC_DECL(XrResult, xrDestroyAction, XrAction)
+XR_FUNC_DECL(XrResult, xrSuggestInteractionProfileBindings, XrInstance, const void*)
+XR_FUNC_DECL(XrResult, xrAttachSessionActionSets, XrSession, const void*)
+XR_FUNC_DECL(XrResult, xrSyncActions, XrSession, const void*)
+XR_FUNC_DECL(XrResult, xrEnumerateBoundSourcesForAction, XrSession, const void*, uint32_t, uint32_t*, void*)
+XR_FUNC_DECL(XrResult, xrGetCurrentInteractionProfile, XrSession, XrPath, void*)
+XR_FUNC_DECL(XrResult, xrGetActionStateBoolean, XrSession, const void*, void*)
+XR_FUNC_DECL(XrResult, xrGetActionStateFloat, XrSession, const void*, void*)
+XR_FUNC_DECL(XrResult, xrGetActionStateVector2f, XrSession, const void*, void*)
+XR_FUNC_DECL(XrResult, xrStringToPath, XrInstance, const char*, void*)
+XR_FUNC_DECL(XrResult, xrPathToString, XrInstance, XrPath, uint32_t, uint32_t*, char*)
+XR_FUNC_DECL(XrResult, xrPollEvent, XrInstance, void*)
+XR_FUNC_DECL(XrResult, xrResultToString, XrInstance, XrResult, void*)
+XR_FUNC_DECL(XrResult, xrCreateSwapchain, XrSession, const void*, void*)
+XR_FUNC_DECL(XrResult, xrDestroySwapchain, XrSwapchain)
+XR_FUNC_DECL(XrResult, xrEnumerateSwapchainFormats, XrSession, uint32_t, uint32_t*, void*)
+XR_FUNC_DECL(XrResult, xrEnumerateSwapchainImages, XrSwapchain, uint32_t, uint32_t*, void*)
+XR_FUNC_DECL(XrResult, xrAcquireSwapchainImage, XrSwapchain, const void*, void*)
+XR_FUNC_DECL(XrResult, xrWaitSwapchainImage, XrSwapchain, const void*)
+XR_FUNC_DECL(XrResult, xrReleaseSwapchainImage, XrSwapchain, const void*)
+XR_FUNC_DECL(XrResult, xrEnumerateViewConfigurationViews, XrInstance, uint64_t, XrViewConfigurationType, uint32_t, uint32_t*, void*)
+XR_FUNC_DECL(XrResult, xrLocateViews, XrSession, const void*, void*, uint32_t, uint32_t*, void*)
+XR_FUNC_DECL(XrResult, xrApplyHapticFeedback, XrSession, const void*, const void*)
+XR_FUNC_DECL(XrResult, xrGetReferenceSpaceBoundsRect, XrSession, XrReferenceSpaceType, void*)
+XR_FUNC_DECL(XrResult, xrCreateActionSpace, XrSession, const void*, void*)
+XR_FUNC_DECL(XrResult, xrEnumerateReferenceSpaces, XrSession, uint32_t, uint32_t*, void*)
+XR_FUNC_DECL(XrResult, xrGetViewConfigurationProperties, XrInstance, uint64_t, XrViewConfigurationType, void*)
+XR_FUNC_DECL(XrResult, xrGetInputSourceLocalizedName, XrSession, const void*, uint32_t, uint32_t*, char*)
+XR_FUNC_DECL(XrResult, xrGetActionStatePose, XrSession, const void*, void*)
+XR_FUNC_DECL(XrResult, xrStopHapticFeedback, XrSession, const void*)
+XR_FUNC_DECL(XrResult, xrEnumerateEnvironmentBlendModes, XrInstance, uint64_t, XrViewConfigurationType, uint32_t, uint32_t*, void*)
+XR_FUNC_DECL(XrResult, xrStructureTypeToString, XrInstance, void*, void*)
+
+// ============================================================
+// Load all xr* function pointers from libopenxr_loader.so
+// ============================================================
+static int load_openxr_functions(void) {
+    if (g_openxr_handle) return 1; // Already loaded
+
+    LOGD("Loading libopenxr_loader.so...");
+    g_openxr_handle = dlopen("libopenxr_loader.so", RTLD_NOW | RTLD_GLOBAL);
+    if (!g_openxr_handle) {
+        LOGE("Failed to load libopenxr_loader.so: %s", dlerror());
+        return 0;
+    }
+    LOGD("libopenxr_loader.so loaded at %p", g_openxr_handle);
+
+    // Macro to resolve a function by name
+    #define RESOLVE(name) do { \
+        g_##name = (name##_fn)dlsym(g_openxr_handle, #name); \
+        if (!g_##name) { \
+            LOGE("Failed to resolve %s: %s", #name, dlerror()); \
+            return 0; \
+        } \
+        LOGD("  Resolved %s -> %p", #name, g_##name); \
+    } while(0)
+
+    // Resolve all xr* functions
+    RESOLVE(xrGetInstanceProcAddr);
+    RESOLVE(xrCreateInstance);
+    RESOLVE(xrDestroyInstance);
+    RESOLVE(xrEnumerateApiLayerProperties);
+    RESOLVE(xrEnumerateInstanceExtensionProperties);
+    RESOLVE(xrGetSystem);
+    RESOLVE(xrGetSystemProperties);
+    RESOLVE(xrCreateSession);
+    RESOLVE(xrDestroySession);
+    RESOLVE(xrBeginSession);
+    RESOLVE(xrEndSession);
+    RESOLVE(xrRequestExitSession);
+    RESOLVE(xrWaitFrame);
+    RESOLVE(xrBeginFrame);
+    RESOLVE(xrEndFrame);
+    RESOLVE(xrCreateReferenceSpace);
+    RESOLVE(xrDestroySpace);
+    RESOLVE(xrLocateSpace);
+    RESOLVE(xrCreateActionSet);
+    RESOLVE(xrDestroyActionSet);
+    RESOLVE(xrCreateAction);
+    RESOLVE(xrDestroyAction);
+    RESOLVE(xrSuggestInteractionProfileBindings);
+    RESOLVE(xrAttachSessionActionSets);
+    RESOLVE(xrSyncActions);
+    RESOLVE(xrEnumerateBoundSourcesForAction);
+    RESOLVE(xrGetCurrentInteractionProfile);
+    RESOLVE(xrGetActionStateBoolean);
+    RESOLVE(xrGetActionStateFloat);
+    RESOLVE(xrGetActionStateVector2f);
+    RESOLVE(xrStringToPath);
+    RESOLVE(xrPathToString);
+    RESOLVE(xrPollEvent);
+    RESOLVE(xrResultToString);
+    RESOLVE(xrCreateSwapchain);
+    RESOLVE(xrDestroySwapchain);
+    RESOLVE(xrEnumerateSwapchainFormats);
+    RESOLVE(xrEnumerateSwapchainImages);
+    RESOLVE(xrAcquireSwapchainImage);
+    RESOLVE(xrWaitSwapchainImage);
+    RESOLVE(xrReleaseSwapchainImage);
+    RESOLVE(xrEnumerateViewConfigurationViews);
+    RESOLVE(xrLocateViews);
+    RESOLVE(xrApplyHapticFeedback);
+    RESOLVE(xrGetReferenceSpaceBoundsRect);
+    RESOLVE(xrCreateActionSpace);
+    RESOLVE(xrEnumerateReferenceSpaces);
+    RESOLVE(xrGetViewConfigurationProperties);
+    RESOLVE(xrGetInputSourceLocalizedName);
+    RESOLVE(xrGetActionStatePose);
+    RESOLVE(xrStopHapticFeedback);
+    RESOLVE(xrEnumerateEnvironmentBlendModes);
+    RESOLVE(xrStructureTypeToString);
+
+    LOGD("All xr* functions resolved successfully");
+    return 1;
+}
+
+// ============================================================
+// Define wrapper functions that export as real symbols
+// Macro: pass signature in (params) and args in (call_args)
+// ============================================================
+#define XR_FUNC_WRAPPER(ret, name, params, call_args) \
+    ret name params { return g_##name call_args; }
+
+// Define all xr* wrapper functions
+XR_FUNC_WRAPPER(XrResult, xrGetInstanceProcAddr, (XrInstance instance, const char* name, void** functionPtr), (instance, name, functionPtr))
+XR_FUNC_WRAPPER(XrResult, xrCreateInstance, (const void* createInfo, void* instance), (createInfo, instance))
+XR_FUNC_WRAPPER(XrResult, xrDestroyInstance, (XrInstance instance), (instance))
+XR_FUNC_WRAPPER(XrResult, xrEnumerateApiLayerProperties, (uint32_t propertyCapacityInput, uint32_t* propertyCountOutput, void* properties), (propertyCapacityInput, propertyCountOutput, properties))
+XR_FUNC_WRAPPER(XrResult, xrEnumerateInstanceExtensionProperties, (const char* layerName, uint32_t propertyCapacityInput, uint32_t* propertyCountOutput, void* properties), (layerName, propertyCapacityInput, propertyCountOutput, properties))
+XR_FUNC_WRAPPER(XrResult, xrGetSystem, (XrInstance instance, const void* getInfo, void* systemId), (instance, getInfo, systemId))
+XR_FUNC_WRAPPER(XrResult, xrGetSystemProperties, (XrInstance instance, uint64_t systemId, void* properties), (instance, systemId, properties))
+XR_FUNC_WRAPPER(XrResult, xrCreateSession, (XrInstance instance, const void* createInfo, void* session), (instance, createInfo, session))
+XR_FUNC_WRAPPER(XrResult, xrDestroySession, (XrSession session), (session))
+XR_FUNC_WRAPPER(XrResult, xrBeginSession, (XrSession session, const void* beginInfo), (session, beginInfo))
+XR_FUNC_WRAPPER(XrResult, xrEndSession, (XrSession session), (session))
+XR_FUNC_WRAPPER(XrResult, xrRequestExitSession, (XrSession session), (session))
+XR_FUNC_WRAPPER(XrResult, xrWaitFrame, (XrSession session, const void* frameWaitInfo, void* frameState), (session, frameWaitInfo, frameState))
+XR_FUNC_WRAPPER(XrResult, xrBeginFrame, (XrSession session, const void* frameBeginInfo), (session, frameBeginInfo))
+XR_FUNC_WRAPPER(XrResult, xrEndFrame, (XrSession session, const void* frameEndInfo), (session, frameEndInfo))
+XR_FUNC_WRAPPER(XrResult, xrCreateReferenceSpace, (XrSession session, const void* createInfo, void* space), (session, createInfo, space))
+XR_FUNC_WRAPPER(XrResult, xrDestroySpace, (XrSpace space), (space))
+XR_FUNC_WRAPPER(XrResult, xrLocateSpace, (XrSpace space, XrSpace baseSpace, XrTime time, void* location), (space, baseSpace, time, location))
+XR_FUNC_WRAPPER(XrResult, xrCreateActionSet, (XrInstance instance, const void* createInfo, void* actionSet), (instance, createInfo, actionSet))
+XR_FUNC_WRAPPER(XrResult, xrDestroyActionSet, (XrActionSet actionSet), (actionSet))
+XR_FUNC_WRAPPER(XrResult, xrCreateAction, (XrActionSet actionSet, const void* createInfo, void* action), (actionSet, createInfo, action))
+XR_FUNC_WRAPPER(XrResult, xrDestroyAction, (XrAction action), (action))
+XR_FUNC_WRAPPER(XrResult, xrSuggestInteractionProfileBindings, (XrInstance instance, const void* suggestedBindings), (instance, suggestedBindings))
+XR_FUNC_WRAPPER(XrResult, xrAttachSessionActionSets, (XrSession session, const void* attachInfo), (session, attachInfo))
+XR_FUNC_WRAPPER(XrResult, xrSyncActions, (XrSession session, const void* syncInfo), (session, syncInfo))
+XR_FUNC_WRAPPER(XrResult, xrEnumerateBoundSourcesForAction, (XrSession session, const void* enumerateInfo, uint32_t sourceCapacityInput, uint32_t* sourceCountOutput, void* sources), (session, enumerateInfo, sourceCapacityInput, sourceCountOutput, sources))
+XR_FUNC_WRAPPER(XrResult, xrGetCurrentInteractionProfile, (XrSession session, XrPath topLevelUserPath, void* interactionProfile), (session, topLevelUserPath, interactionProfile))
+XR_FUNC_WRAPPER(XrResult, xrGetActionStateBoolean, (XrSession session, const void* getInfo, void* state), (session, getInfo, state))
+XR_FUNC_WRAPPER(XrResult, xrGetActionStateFloat, (XrSession session, const void* getInfo, void* state), (session, getInfo, state))
+XR_FUNC_WRAPPER(XrResult, xrGetActionStateVector2f, (XrSession session, const void* getInfo, void* state), (session, getInfo, state))
+XR_FUNC_WRAPPER(XrResult, xrStringToPath, (XrInstance instance, const char* pathString, void* path), (instance, pathString, path))
+XR_FUNC_WRAPPER(XrResult, xrPathToString, (XrInstance instance, XrPath path, uint32_t bufferCapacityInput, uint32_t* bufferCountOutput, char* buffer), (instance, path, bufferCapacityInput, bufferCountOutput, buffer))
+XR_FUNC_WRAPPER(XrResult, xrPollEvent, (XrInstance instance, void* eventData), (instance, eventData))
+XR_FUNC_WRAPPER(XrResult, xrResultToString, (XrInstance instance, XrResult value, void* buffer), (instance, value, buffer))
+XR_FUNC_WRAPPER(XrResult, xrCreateSwapchain, (XrSession session, const void* createInfo, void* swapchain), (session, createInfo, swapchain))
+XR_FUNC_WRAPPER(XrResult, xrDestroySwapchain, (XrSwapchain swapchain), (swapchain))
+XR_FUNC_WRAPPER(XrResult, xrEnumerateSwapchainFormats, (XrSession session, uint32_t formatCapacityInput, uint32_t* formatCountOutput, void* formats), (session, formatCapacityInput, formatCountOutput, formats))
+XR_FUNC_WRAPPER(XrResult, xrEnumerateSwapchainImages, (XrSwapchain swapchain, uint32_t imageCapacityInput, uint32_t* imageCountOutput, void* images), (swapchain, imageCapacityInput, imageCountOutput, images))
+XR_FUNC_WRAPPER(XrResult, xrAcquireSwapchainImage, (XrSwapchain swapchain, const void* acquireInfo, void* index), (swapchain, acquireInfo, index))
+XR_FUNC_WRAPPER(XrResult, xrWaitSwapchainImage, (XrSwapchain swapchain, const void* waitInfo), (swapchain, waitInfo))
+XR_FUNC_WRAPPER(XrResult, xrReleaseSwapchainImage, (XrSwapchain swapchain, const void* releaseInfo), (swapchain, releaseInfo))
+XR_FUNC_WRAPPER(XrResult, xrEnumerateViewConfigurationViews, (XrInstance instance, uint64_t systemId, XrViewConfigurationType viewConfigurationType, uint32_t viewCapacityInput, uint32_t* viewCountOutput, void* views), (instance, systemId, viewConfigurationType, viewCapacityInput, viewCountOutput, views))
+XR_FUNC_WRAPPER(XrResult, xrLocateViews, (XrSession session, const void* viewLocateInfo, void* viewState, uint32_t viewCapacityInput, uint32_t* viewCountOutput, void* views), (session, viewLocateInfo, viewState, viewCapacityInput, viewCountOutput, views))
+XR_FUNC_WRAPPER(XrResult, xrApplyHapticFeedback, (XrSession session, const void* hapticActionInfo, const void* hapticFeedback), (session, hapticActionInfo, hapticFeedback))
+XR_FUNC_WRAPPER(XrResult, xrGetReferenceSpaceBoundsRect, (XrSession session, XrReferenceSpaceType referenceSpaceType, void* bounds), (session, referenceSpaceType, bounds))
+XR_FUNC_WRAPPER(XrResult, xrCreateActionSpace, (XrSession session, const void* createInfo, void* space), (session, createInfo, space))
+XR_FUNC_WRAPPER(XrResult, xrEnumerateReferenceSpaces, (XrSession session, uint32_t spaceCapacityInput, uint32_t* spaceCountOutput, void* spaces), (session, spaceCapacityInput, spaceCountOutput, spaces))
+XR_FUNC_WRAPPER(XrResult, xrGetViewConfigurationProperties, (XrInstance instance, uint64_t systemId, XrViewConfigurationType viewConfigurationType, void* configurationProperties), (instance, systemId, viewConfigurationType, configurationProperties))
+XR_FUNC_WRAPPER(XrResult, xrGetInputSourceLocalizedName, (XrSession session, const void* getInfo, uint32_t bufferCapacityInput, uint32_t* bufferCountOutput, char* buffer), (session, getInfo, bufferCapacityInput, bufferCountOutput, buffer))
+XR_FUNC_WRAPPER(XrResult, xrGetActionStatePose, (XrSession session, const void* getInfo, void* state), (session, getInfo, state))
+XR_FUNC_WRAPPER(XrResult, xrStopHapticFeedback, (XrSession session, const void* hapticActionInfo), (session, hapticActionInfo))
+XR_FUNC_WRAPPER(XrResult, xrEnumerateEnvironmentBlendModes, (XrInstance instance, uint64_t systemId, XrViewConfigurationType viewConfigurationType, uint32_t blendModeCapacityInput, uint32_t* blendModeCountOutput, void* blendModes), (instance, systemId, viewConfigurationType, blendModeCapacityInput, blendModeCountOutput, blendModes))
+XR_FUNC_WRAPPER(XrResult, xrStructureTypeToString, (XrInstance instance, void* structureType, void* buffer), (instance, structureType, buffer))
+
+// ============================================================
+// Android extern variables - set by OpenComposite at runtime
+// ============================================================
 XrInstanceCreateInfoAndroidKHR* OpenComposite_Android_Create_Info = NULL;
 XrGraphicsBindingOpenGLESAndroidKHR* OpenComposite_Android_GLES_Binding_Info = NULL;
-static void* openxr_handle = NULL;
-static int openxr_initialized = 0;
-static int openxr_init_failed = 0;
-
-// Try to load the OpenXR loader from multiple paths
-static void* try_load_openxr(void) {
-    // Paths to try for the OpenXR loader
-    // On Quest devices, the loader is typically in /system/lib64 or /vendor/lib64
-    const char* paths[] = {
-        "libopenxr_loader.so",                           // Default name (system search path)
-        "/system/lib64/libopenxr_loader.so",             // Quest 64-bit system path
-        "/vendor/lib64/libopenxr_loader.so",             // Quest 64-bit vendor path
-        "/odm/lib64/libopenxr_loader.so",                // ODM path
-        "/system/lib/libopenxr_loader.so",               // Quest 32-bit system path
-        "/vendor/lib/libopenxr_loader.so",               // Quest 32-bit vendor path
-        NULL
-    };
-
-    // First, try to find the loader in already loaded libraries
-    // This is useful if the loader was loaded by the system or another library
-    void* already_loaded = dlopen("libopenxr_loader.so", RTLD_LAZY | RTLD_NOLOAD);
-    if (already_loaded != NULL) {
-        LOGD("OpenXR loader already loaded via: libopenxr_loader.so");
-        return already_loaded;
-    }
-
-    // Try each path
-    for (int i = 0; paths[i] != NULL; i++) {
-        void* handle = dlopen(paths[i], RTLD_LAZY | RTLD_GLOBAL);
-        if (handle != NULL) {
-            LOGD("OpenXR loader loaded successfully from: %s", paths[i]);
-            return handle;
-        }
-        // Log the error for debugging
-        LOGE("Failed to load OpenXR loader from %s: %s", paths[i], dlerror());
-    }
-
-    // All paths failed
-    LOGE("OpenXR loader not found on this device!");
-    return NULL;
-}
-
-static void* get_xr_func(const char* name) {
-    if (!openxr_initialized) {
-        openxr_initialized = 1;
-        openxr_handle = try_load_openxr();
-        if (!openxr_handle) {
-            openxr_init_failed = 1;
-            return NULL;
-        }
-    }
-    if (openxr_init_failed) return NULL;
-    
-    void* sym = dlsym(openxr_handle, name);
-    return sym;
-}
-
-XrResult xrCreateInstance(const void* createInfo, void* instance) {
-    static XrResult (*real_fn)(const void* createInfo, void* instance) = NULL;
-    if (!real_fn) {
-        void* sym = get_xr_func("xrCreateInstance");
-        if (sym) {
-            real_fn = (XrResult (*)(const void* createInfo, void* instance))sym;
-        } else {
-            return 0;
-        }
-    }
-    return real_fn(createInfo, instance);
-}
-
-XrResult xrDestroyInstance(XrInstance instance) {
-    static XrResult (*real_fn)(XrInstance instance) = NULL;
-    if (!real_fn) {
-        void* sym = get_xr_func("xrDestroyInstance");
-        if (sym) {
-            real_fn = (XrResult (*)(XrInstance instance))sym;
-        } else {
-            return 0;
-        }
-    }
-    return real_fn(instance);
-}
-
-XrResult xrGetInstanceProcAddr(XrInstance instance, const char* name, void** functionPtr) {
-    static XrResult (*real_fn)(XrInstance instance, const char* name, void** functionPtr) = NULL;
-    if (!real_fn) {
-        void* sym = get_xr_func("xrGetInstanceProcAddr");
-        if (sym) {
-            real_fn = (XrResult (*)(XrInstance instance, const char* name, void** functionPtr))sym;
-        } else {
-            return 0;
-        }
-    }
-    return real_fn(instance, name, functionPtr);
-}
-
-XrResult xrEnumerateApiLayerProperties(uint32_t propertyCapacityInput, uint32_t* propertyCountOutput, void* properties) {
-    static XrResult (*real_fn)(uint32_t propertyCapacityInput, uint32_t* propertyCountOutput, void* properties) = NULL;
-    if (!real_fn) {
-        void* sym = get_xr_func("xrEnumerateApiLayerProperties");
-        if (sym) {
-            real_fn = (XrResult (*)(uint32_t propertyCapacityInput, uint32_t* propertyCountOutput, void* properties))sym;
-        } else {
-            return 0;
-        }
-    }
-    return real_fn(propertyCapacityInput, propertyCountOutput, properties);
-}
-
-XrResult xrEnumerateInstanceExtensionProperties(const char* layerName, uint32_t propertyCapacityInput, uint32_t* propertyCountOutput, void* properties) {
-    static XrResult (*real_fn)(const char* layerName, uint32_t propertyCapacityInput, uint32_t* propertyCountOutput, void* properties) = NULL;
-    if (!real_fn) {
-        void* sym = get_xr_func("xrEnumerateInstanceExtensionProperties");
-        if (sym) {
-            real_fn = (XrResult (*)(const char* layerName, uint32_t propertyCapacityInput, uint32_t* propertyCountOutput, void* properties))sym;
-        } else {
-            return 0;
-        }
-    }
-    return real_fn(layerName, propertyCapacityInput, propertyCountOutput, properties);
-}
-
-XrResult xrGetSystem(XrInstance instance, const void* getInfo, void* systemId) {
-    static XrResult (*real_fn)(XrInstance instance, const void* getInfo, void* systemId) = NULL;
-    if (!real_fn) {
-        void* sym = get_xr_func("xrGetSystem");
-        if (sym) {
-            real_fn = (XrResult (*)(XrInstance instance, const void* getInfo, void* systemId))sym;
-        } else {
-            return 0;
-        }
-    }
-    return real_fn(instance, getInfo, systemId);
-}
-
-XrResult xrGetSystemProperties(XrInstance instance, uint64_t systemId, void* properties) {
-    static XrResult (*real_fn)(XrInstance instance, uint64_t systemId, void* properties) = NULL;
-    if (!real_fn) {
-        void* sym = get_xr_func("xrGetSystemProperties");
-        if (sym) {
-            real_fn = (XrResult (*)(XrInstance instance, uint64_t systemId, void* properties))sym;
-        } else {
-            return 0;
-        }
-    }
-    return real_fn(instance, systemId, properties);
-}
-
-XrResult xrCreateSession(XrInstance instance, const void* createInfo, void* session) {
-    static XrResult (*real_fn)(XrInstance instance, const void* createInfo, void* session) = NULL;
-    if (!real_fn) {
-        void* sym = get_xr_func("xrCreateSession");
-        if (sym) {
-            real_fn = (XrResult (*)(XrInstance instance, const void* createInfo, void* session))sym;
-        } else {
-            return 0;
-        }
-    }
-    return real_fn(instance, createInfo, session);
-}
-
-XrResult xrDestroySession(XrSession session) {
-    static XrResult (*real_fn)(XrSession session) = NULL;
-    if (!real_fn) {
-        void* sym = get_xr_func("xrDestroySession");
-        if (sym) {
-            real_fn = (XrResult (*)(XrSession session))sym;
-        } else {
-            return 0;
-        }
-    }
-    return real_fn(session);
-}
-
-XrResult xrBeginSession(XrSession session, const void* beginInfo) {
-    static XrResult (*real_fn)(XrSession session, const void* beginInfo) = NULL;
-    if (!real_fn) {
-        void* sym = get_xr_func("xrBeginSession");
-        if (sym) {
-            real_fn = (XrResult (*)(XrSession session, const void* beginInfo))sym;
-        } else {
-            return 0;
-        }
-    }
-    return real_fn(session, beginInfo);
-}
-
-XrResult xrEndSession(XrSession session) {
-    static XrResult (*real_fn)(XrSession session) = NULL;
-    if (!real_fn) {
-        void* sym = get_xr_func("xrEndSession");
-        if (sym) {
-            real_fn = (XrResult (*)(XrSession session))sym;
-        } else {
-            return 0;
-        }
-    }
-    return real_fn(session);
-}
-
-XrResult xrRequestExitSession(XrSession session) {
-    static XrResult (*real_fn)(XrSession session) = NULL;
-    if (!real_fn) {
-        void* sym = get_xr_func("xrRequestExitSession");
-        if (sym) {
-            real_fn = (XrResult (*)(XrSession session))sym;
-        } else {
-            return 0;
-        }
-    }
-    return real_fn(session);
-}
-
-XrResult xrWaitFrame(XrSession session, const void* frameWaitInfo, void* frameState) {
-    static XrResult (*real_fn)(XrSession session, const void* frameWaitInfo, void* frameState) = NULL;
-    if (!real_fn) {
-        void* sym = get_xr_func("xrWaitFrame");
-        if (sym) {
-            real_fn = (XrResult (*)(XrSession session, const void* frameWaitInfo, void* frameState))sym;
-        } else {
-            return 0;
-        }
-    }
-    return real_fn(session, frameWaitInfo, frameState);
-}
-
-XrResult xrBeginFrame(XrSession session, const void* frameBeginInfo) {
-    static XrResult (*real_fn)(XrSession session, const void* frameBeginInfo) = NULL;
-    if (!real_fn) {
-        void* sym = get_xr_func("xrBeginFrame");
-        if (sym) {
-            real_fn = (XrResult (*)(XrSession session, const void* frameBeginInfo))sym;
-        } else {
-            return 0;
-        }
-    }
-    return real_fn(session, frameBeginInfo);
-}
-
-XrResult xrEndFrame(XrSession session, const void* frameEndInfo) {
-    static XrResult (*real_fn)(XrSession session, const void* frameEndInfo) = NULL;
-    if (!real_fn) {
-        void* sym = get_xr_func("xrEndFrame");
-        if (sym) {
-            real_fn = (XrResult (*)(XrSession session, const void* frameEndInfo))sym;
-        } else {
-            return 0;
-        }
-    }
-    return real_fn(session, frameEndInfo);
-}
-
-XrResult xrCreateReferenceSpace(XrSession session, const void* createInfo, void* space) {
-    static XrResult (*real_fn)(XrSession session, const void* createInfo, void* space) = NULL;
-    if (!real_fn) {
-        void* sym = get_xr_func("xrCreateReferenceSpace");
-        if (sym) {
-            real_fn = (XrResult (*)(XrSession session, const void* createInfo, void* space))sym;
-        } else {
-            return 0;
-        }
-    }
-    return real_fn(session, createInfo, space);
-}
-
-XrResult xrDestroySpace(XrSpace space) {
-    static XrResult (*real_fn)(XrSpace space) = NULL;
-    if (!real_fn) {
-        void* sym = get_xr_func("xrDestroySpace");
-        if (sym) {
-            real_fn = (XrResult (*)(XrSpace space))sym;
-        } else {
-            return 0;
-        }
-    }
-    return real_fn(space);
-}
-
-XrResult xrLocateSpace(XrSpace space, XrSpace baseSpace, XrTime time, void* location) {
-    static XrResult (*real_fn)(XrSpace space, XrSpace baseSpace, XrTime time, void* location) = NULL;
-    if (!real_fn) {
-        void* sym = get_xr_func("xrLocateSpace");
-        if (sym) {
-            real_fn = (XrResult (*)(XrSpace space, XrSpace baseSpace, XrTime time, void* location))sym;
-        } else {
-            return 0;
-        }
-    }
-    return real_fn(space, baseSpace, time, location);
-}
-
-XrResult xrCreateActionSet(XrInstance instance, const void* createInfo, void* actionSet) {
-    static XrResult (*real_fn)(XrInstance instance, const void* createInfo, void* actionSet) = NULL;
-    if (!real_fn) {
-        void* sym = get_xr_func("xrCreateActionSet");
-        if (sym) {
-            real_fn = (XrResult (*)(XrInstance instance, const void* createInfo, void* actionSet))sym;
-        } else {
-            return 0;
-        }
-    }
-    return real_fn(instance, createInfo, actionSet);
-}
-
-XrResult xrDestroyActionSet(XrActionSet actionSet) {
-    static XrResult (*real_fn)(XrActionSet actionSet) = NULL;
-    if (!real_fn) {
-        void* sym = get_xr_func("xrDestroyActionSet");
-        if (sym) {
-            real_fn = (XrResult (*)(XrActionSet actionSet))sym;
-        } else {
-            return 0;
-        }
-    }
-    return real_fn(actionSet);
-}
-
-XrResult xrCreateAction(XrActionSet actionSet, const void* createInfo, void* action) {
-    static XrResult (*real_fn)(XrActionSet actionSet, const void* createInfo, void* action) = NULL;
-    if (!real_fn) {
-        void* sym = get_xr_func("xrCreateAction");
-        if (sym) {
-            real_fn = (XrResult (*)(XrActionSet actionSet, const void* createInfo, void* action))sym;
-        } else {
-            return 0;
-        }
-    }
-    return real_fn(actionSet, createInfo, action);
-}
-
-XrResult xrDestroyAction(XrAction action) {
-    static XrResult (*real_fn)(XrAction action) = NULL;
-    if (!real_fn) {
-        void* sym = get_xr_func("xrDestroyAction");
-        if (sym) {
-            real_fn = (XrResult (*)(XrAction action))sym;
-        } else {
-            return 0;
-        }
-    }
-    return real_fn(action);
-}
-
-XrResult xrSuggestInteractionProfileBindings(XrInstance instance, const void* suggestedBindings) {
-    static XrResult (*real_fn)(XrInstance instance, const void* suggestedBindings) = NULL;
-    if (!real_fn) {
-        void* sym = get_xr_func("xrSuggestInteractionProfileBindings");
-        if (sym) {
-            real_fn = (XrResult (*)(XrInstance instance, const void* suggestedBindings))sym;
-        } else {
-            return 0;
-        }
-    }
-    return real_fn(instance, suggestedBindings);
-}
-
-XrResult xrAttachSessionActionSets(XrSession session, const void* attachInfo) {
-    static XrResult (*real_fn)(XrSession session, const void* attachInfo) = NULL;
-    if (!real_fn) {
-        void* sym = get_xr_func("xrAttachSessionActionSets");
-        if (sym) {
-            real_fn = (XrResult (*)(XrSession session, const void* attachInfo))sym;
-        } else {
-            return 0;
-        }
-    }
-    return real_fn(session, attachInfo);
-}
-
-XrResult xrSyncActions(XrSession session, const void* syncInfo) {
-    static XrResult (*real_fn)(XrSession session, const void* syncInfo) = NULL;
-    if (!real_fn) {
-        void* sym = get_xr_func("xrSyncActions");
-        if (sym) {
-            real_fn = (XrResult (*)(XrSession session, const void* syncInfo))sym;
-        } else {
-            return 0;
-        }
-    }
-    return real_fn(session, syncInfo);
-}
-
-XrResult xrEnumerateBoundSourcesForAction(XrSession session, const void* enumerateInfo, uint32_t sourceCapacityInput, uint32_t* sourceCountOutput, void* sources) {
-    static XrResult (*real_fn)(XrSession session, const void* enumerateInfo, uint32_t sourceCapacityInput, uint32_t* sourceCountOutput, void* sources) = NULL;
-    if (!real_fn) {
-        void* sym = get_xr_func("xrEnumerateBoundSourcesForAction");
-        if (sym) {
-            real_fn = (XrResult (*)(XrSession session, const void* enumerateInfo, uint32_t sourceCapacityInput, uint32_t* sourceCountOutput, void* sources))sym;
-        } else {
-            return 0;
-        }
-    }
-    return real_fn(session, enumerateInfo, sourceCapacityInput, sourceCountOutput, sources);
-}
-
-XrResult xrGetCurrentInteractionProfile(XrSession session, XrPath topLevelUserPath, void* interactionProfile) {
-    static XrResult (*real_fn)(XrSession session, XrPath topLevelUserPath, void* interactionProfile) = NULL;
-    if (!real_fn) {
-        void* sym = get_xr_func("xrGetCurrentInteractionProfile");
-        if (sym) {
-            real_fn = (XrResult (*)(XrSession session, XrPath topLevelUserPath, void* interactionProfile))sym;
-        } else {
-            return 0;
-        }
-    }
-    return real_fn(session, topLevelUserPath, interactionProfile);
-}
-
-XrResult xrGetActionStateBoolean(XrSession session, const void* getInfo, void* state) {
-    static XrResult (*real_fn)(XrSession session, const void* getInfo, void* state) = NULL;
-    if (!real_fn) {
-        void* sym = get_xr_func("xrGetActionStateBoolean");
-        if (sym) {
-            real_fn = (XrResult (*)(XrSession session, const void* getInfo, void* state))sym;
-        } else {
-            return 0;
-        }
-    }
-    return real_fn(session, getInfo, state);
-}
-
-XrResult xrGetActionStateFloat(XrSession session, const void* getInfo, void* state) {
-    static XrResult (*real_fn)(XrSession session, const void* getInfo, void* state) = NULL;
-    if (!real_fn) {
-        void* sym = get_xr_func("xrGetActionStateFloat");
-        if (sym) {
-            real_fn = (XrResult (*)(XrSession session, const void* getInfo, void* state))sym;
-        } else {
-            return 0;
-        }
-    }
-    return real_fn(session, getInfo, state);
-}
-
-XrResult xrGetActionStateVector2f(XrSession session, const void* getInfo, void* state) {
-    static XrResult (*real_fn)(XrSession session, const void* getInfo, void* state) = NULL;
-    if (!real_fn) {
-        void* sym = get_xr_func("xrGetActionStateVector2f");
-        if (sym) {
-            real_fn = (XrResult (*)(XrSession session, const void* getInfo, void* state))sym;
-        } else {
-            return 0;
-        }
-    }
-    return real_fn(session, getInfo, state);
-}
-
-XrResult xrStringToPath(XrInstance instance, const char* pathString, void* path) {
-    static XrResult (*real_fn)(XrInstance instance, const char* pathString, void* path) = NULL;
-    if (!real_fn) {
-        void* sym = get_xr_func("xrStringToPath");
-        if (sym) {
-            real_fn = (XrResult (*)(XrInstance instance, const char* pathString, void* path))sym;
-        } else {
-            return 0;
-        }
-    }
-    return real_fn(instance, pathString, path);
-}
-
-XrResult xrPathToString(XrInstance instance, XrPath path, uint32_t bufferCapacityInput, uint32_t* bufferCountOutput, char* buffer) {
-    static XrResult (*real_fn)(XrInstance instance, XrPath path, uint32_t bufferCapacityInput, uint32_t* bufferCountOutput, char* buffer) = NULL;
-    if (!real_fn) {
-        void* sym = get_xr_func("xrPathToString");
-        if (sym) {
-            real_fn = (XrResult (*)(XrInstance instance, XrPath path, uint32_t bufferCapacityInput, uint32_t* bufferCountOutput, char* buffer))sym;
-        } else {
-            return 0;
-        }
-    }
-    return real_fn(instance, path, bufferCapacityInput, bufferCountOutput, buffer);
-}
-
-XrResult xrPollEvent(XrInstance instance, void* eventData) {
-    static XrResult (*real_fn)(XrInstance instance, void* eventData) = NULL;
-    if (!real_fn) {
-        void* sym = get_xr_func("xrPollEvent");
-        if (sym) {
-            real_fn = (XrResult (*)(XrInstance instance, void* eventData))sym;
-        } else {
-            return 0;
-        }
-    }
-    return real_fn(instance, eventData);
-}
-
-XrResult xrResultToString(XrInstance instance, XrResult value, void* buffer) {
-    static XrResult (*real_fn)(XrInstance instance, XrResult value, void* buffer) = NULL;
-    if (!real_fn) {
-        void* sym = get_xr_func("xrResultToString");
-        if (sym) {
-            real_fn = (XrResult (*)(XrInstance instance, XrResult value, void* buffer))sym;
-        } else {
-            return 0;
-        }
-    }
-    return real_fn(instance, value, buffer);
-}
-
-XrResult xrCreateSwapchain(XrSession session, const void* createInfo, void* swapchain) {
-    static XrResult (*real_fn)(XrSession session, const void* createInfo, void* swapchain) = NULL;
-    if (!real_fn) {
-        void* sym = get_xr_func("xrCreateSwapchain");
-        if (sym) {
-            real_fn = (XrResult (*)(XrSession session, const void* createInfo, void* swapchain))sym;
-        } else {
-            return 0;
-        }
-    }
-    return real_fn(session, createInfo, swapchain);
-}
-
-XrResult xrDestroySwapchain(XrSwapchain swapchain) {
-    static XrResult (*real_fn)(XrSwapchain swapchain) = NULL;
-    if (!real_fn) {
-        void* sym = get_xr_func("xrDestroySwapchain");
-        if (sym) {
-            real_fn = (XrResult (*)(XrSwapchain swapchain))sym;
-        } else {
-            return 0;
-        }
-    }
-    return real_fn(swapchain);
-}
-
-XrResult xrEnumerateSwapchainFormats(XrSession session, uint32_t formatCapacityInput, uint32_t* formatCountOutput, void* formats) {
-    static XrResult (*real_fn)(XrSession session, uint32_t formatCapacityInput, uint32_t* formatCountOutput, void* formats) = NULL;
-    if (!real_fn) {
-        void* sym = get_xr_func("xrEnumerateSwapchainFormats");
-        if (sym) {
-            real_fn = (XrResult (*)(XrSession session, uint32_t formatCapacityInput, uint32_t* formatCountOutput, void* formats))sym;
-        } else {
-            return 0;
-        }
-    }
-    return real_fn(session, formatCapacityInput, formatCountOutput, formats);
-}
-
-XrResult xrEnumerateSwapchainImages(XrSwapchain swapchain, uint32_t imageCapacityInput, uint32_t* imageCountOutput, void* images) {
-    static XrResult (*real_fn)(XrSwapchain swapchain, uint32_t imageCapacityInput, uint32_t* imageCountOutput, void* images) = NULL;
-    if (!real_fn) {
-        void* sym = get_xr_func("xrEnumerateSwapchainImages");
-        if (sym) {
-            real_fn = (XrResult (*)(XrSwapchain swapchain, uint32_t imageCapacityInput, uint32_t* imageCountOutput, void* images))sym;
-        } else {
-            return 0;
-        }
-    }
-    return real_fn(swapchain, imageCapacityInput, imageCountOutput, images);
-}
-
-XrResult xrAcquireSwapchainImage(XrSwapchain swapchain, const void* acquireInfo, void* index) {
-    static XrResult (*real_fn)(XrSwapchain swapchain, const void* acquireInfo, void* index) = NULL;
-    if (!real_fn) {
-        void* sym = get_xr_func("xrAcquireSwapchainImage");
-        if (sym) {
-            real_fn = (XrResult (*)(XrSwapchain swapchain, const void* acquireInfo, void* index))sym;
-        } else {
-            return 0;
-        }
-    }
-    return real_fn(swapchain, acquireInfo, index);
-}
-
-XrResult xrWaitSwapchainImage(XrSwapchain swapchain, const void* waitInfo) {
-    static XrResult (*real_fn)(XrSwapchain swapchain, const void* waitInfo) = NULL;
-    if (!real_fn) {
-        void* sym = get_xr_func("xrWaitSwapchainImage");
-        if (sym) {
-            real_fn = (XrResult (*)(XrSwapchain swapchain, const void* waitInfo))sym;
-        } else {
-            return 0;
-        }
-    }
-    return real_fn(swapchain, waitInfo);
-}
-
-XrResult xrReleaseSwapchainImage(XrSwapchain swapchain, const void* releaseInfo) {
-    static XrResult (*real_fn)(XrSwapchain swapchain, const void* releaseInfo) = NULL;
-    if (!real_fn) {
-        void* sym = get_xr_func("xrReleaseSwapchainImage");
-        if (sym) {
-            real_fn = (XrResult (*)(XrSwapchain swapchain, const void* releaseInfo))sym;
-        } else {
-            return 0;
-        }
-    }
-    return real_fn(swapchain, releaseInfo);
-}
-
-XrResult xrEnumerateViewConfigurationViews(XrInstance instance, uint64_t systemId, XrViewConfigurationType viewConfigurationType, uint32_t viewCapacityInput, uint32_t* viewCountOutput, void* views) {
-    static XrResult (*real_fn)(XrInstance instance, uint64_t systemId, XrViewConfigurationType viewConfigurationType, uint32_t viewCapacityInput, uint32_t* viewCountOutput, void* views) = NULL;
-    if (!real_fn) {
-        void* sym = get_xr_func("xrEnumerateViewConfigurationViews");
-        if (sym) {
-            real_fn = (XrResult (*)(XrInstance instance, uint64_t systemId, XrViewConfigurationType viewConfigurationType, uint32_t viewCapacityInput, uint32_t* viewCountOutput, void* views))sym;
-        } else {
-            return 0;
-        }
-    }
-    return real_fn(instance, systemId, viewConfigurationType, viewCapacityInput, viewCountOutput, views);
-}
-
-XrResult xrLocateViews(XrSession session, const void* viewLocateInfo, void* viewState, uint32_t viewCapacityInput, uint32_t* viewCountOutput, void* views) {
-    static XrResult (*real_fn)(XrSession session, const void* viewLocateInfo, void* viewState, uint32_t viewCapacityInput, uint32_t* viewCountOutput, void* views) = NULL;
-    if (!real_fn) {
-        void* sym = get_xr_func("xrLocateViews");
-        if (sym) {
-            real_fn = (XrResult (*)(XrSession session, const void* viewLocateInfo, void* viewState, uint32_t viewCapacityInput, uint32_t* viewCountOutput, void* views))sym;
-        } else {
-            return 0;
-        }
-    }
-    return real_fn(session, viewLocateInfo, viewState, viewCapacityInput, viewCountOutput, views);
-}
-
-XrResult xrApplyHapticFeedback(XrSession session, const void* hapticActionInfo, const void* hapticFeedback) {
-    static XrResult (*real_fn)(XrSession session, const void* hapticActionInfo, const void* hapticFeedback) = NULL;
-    if (!real_fn) {
-        void* sym = get_xr_func("xrApplyHapticFeedback");
-        if (sym) {
-            real_fn = (XrResult (*)(XrSession session, const void* hapticActionInfo, const void* hapticFeedback))sym;
-        } else {
-            return 0;
-        }
-    }
-    return real_fn(session, hapticActionInfo, hapticFeedback);
-}
-
-XrResult xrGetReferenceSpaceBoundsRect(XrSession session, XrReferenceSpaceType referenceSpaceType, void* bounds) {
-    static XrResult (*real_fn)(XrSession session, XrReferenceSpaceType referenceSpaceType, void* bounds) = NULL;
-    if (!real_fn) {
-        void* sym = get_xr_func("xrGetReferenceSpaceBoundsRect");
-        if (sym) {
-            real_fn = (XrResult (*)(XrSession session, XrReferenceSpaceType referenceSpaceType, void* bounds))sym;
-        } else {
-            return 0;
-        }
-    }
-    return real_fn(session, referenceSpaceType, bounds);
-}
-
-XrResult xrCreateActionSpace(XrSession session, const void* createInfo, void* space) {
-    static XrResult (*real_fn)(XrSession session, const void* createInfo, void* space) = NULL;
-    if (!real_fn) {
-        void* sym = get_xr_func("xrCreateActionSpace");
-        if (sym) {
-            real_fn = (XrResult (*)(XrSession session, const void* createInfo, void* space))sym;
-        } else {
-            return 0;
-        }
-    }
-    return real_fn(session, createInfo, space);
-}
-
-
-
-// Vulkan extension wrapper
-typedef struct VkPhysicalDeviceProperties2 {
-    void* sType;
-    void* pNext;
-    void* properties;
-} VkPhysicalDeviceProperties2;
-
-void vkGetPhysicalDeviceProperties2(void* physicalDevice, VkPhysicalDeviceProperties2* pProperties) {
-    static void (*real_fn)(void*, VkPhysicalDeviceProperties2*) = NULL;
-    if (!real_fn) {
-        void* handle = dlopen("libvulkan.so", RTLD_NOW | RTLD_GLOBAL);
-        if (handle) {
-            real_fn = (void (*)(void*, VkPhysicalDeviceProperties2*))dlsym(handle, "vkGetPhysicalDeviceProperties2");
-        }
-        if (!real_fn) {
-            // Fallback - just return without doing anything
-            return;
-        }
-    }
-    real_fn(physicalDevice, pProperties);
-}
-
 
 // ============================================================
-// PojavLauncher JNI bridge for MCXRLoader
-// References: net.kdt.pojavlaunch.MCXRLoader
-// ============================================================
-
-#include <jni.h>
-#include <EGL/egl.h>
-#include <EGL/eglext.h>
-
 // pojav_environ struct (from environ.h)
+// ============================================================
 typedef struct {
     void* eventCounter;
     void* events;
@@ -785,27 +310,92 @@ typedef struct {
 static pojav_environ_s g_pojav_environ = {0};
 pojav_environ_s *pojav_environ = &g_pojav_environ;
 
+// ============================================================
 // Android OpenXR data instances
-// These are used by DrvOpenXR.cpp
+// ============================================================
 static XrInstanceCreateInfoAndroidKHR g_android_create_info = {0};
 static XrGraphicsBindingOpenGLESAndroidKHR g_android_gles_binding = {0};
 
 // Forward declarations
 extern void* JavaVM_CreateJavaVM(void* vm, void* activity);
 
-// Saved JavaVM pointer (set by JNI_OnLoad, used by launch thread)
+// Saved JavaVM pointer
 static JavaVM* g_jvm = NULL;
 
-// Static long long values for display/config/context
+// Static EGL values for display/config/context
 static EGLDisplay g_egl_display = EGL_NO_DISPLAY;
 static EGLConfig g_egl_config = NULL;
 static EGLContext g_egl_context = EGL_NO_CONTEXT;
+static int g_openxr_loader_initialized = 0;
 
-// JNI function: net.kdt.pojavlaunch.MCXRLoader.launch(android.app.Activity)
-// Starts the VR application by calling activity.runCraft() in a new thread
-// This matches the original libopenvr_api.so behavior
-#include <pthread.h>
+// ============================================================
+// xrInitializeLoaderKHR - special handling
+// The function has C++ name mangling in the loader, so we find
+// it via xrGetInstanceProcAddr (which is an unmangled C symbol)
+// ============================================================
+static void initialize_openxr_loader(void* jvm, void* activity) {
+    if (g_openxr_loader_initialized) return;
+    g_openxr_loader_initialized = 1;
 
+    LOGD("Initializing OpenXR loader via xrGetInstanceProcAddr...");
+
+    // Use xrGetInstanceProcAddr with null instance to find xrInitializeLoaderKHR
+    void* initLoaderFunc = NULL;
+    XrResult res = xrGetInstanceProcAddr((XrInstance)0, "xrInitializeLoaderKHR", &initLoaderFunc);
+
+    if (res == 0 && initLoaderFunc != NULL) {
+        LOGD("Found xrInitializeLoaderKHR via xrGetInstanceProcAddr");
+
+        // Set up XrLoaderInitInfoAndroidKHR struct
+        // Layout:
+        //   offset 0: type (uint64_t) = XR_TYPE_LOADER_INIT_INFO_ANDROID_KHR (1000295000)
+        //   offset 8: next (void*) = NULL
+        //   offset 16: applicationVM (void*)
+        //   offset 24: applicationActivity (void*)
+        void* loaderInfo[4];
+        loaderInfo[0] = (void*)(intptr_t)1000295000; // XR_TYPE_LOADER_INIT_INFO_ANDROID_KHR
+        loaderInfo[1] = NULL;
+        loaderInfo[2] = jvm;
+        loaderInfo[3] = activity;
+
+        // Call xrInitializeLoaderKHR
+        XrResult initRes = ((XrResult (*)(void*))initLoaderFunc)(loaderInfo);
+        LOGD("xrInitializeLoaderKHR returned: %d", initRes);
+    } else {
+        LOGE("xrInitializeLoaderKHR not found via xrGetInstanceProcAddr (res=%d, func=%p)", res, initLoaderFunc);
+    }
+}
+
+// ============================================================
+// JNI functions for net.kdt.pojavlaunch.MCXRLoader
+// ============================================================
+
+// JNI_OnLoad: Called when library is loaded via System.loadLibrary
+JNIEXPORT jint JNICALL
+JNI_OnLoad(JavaVM* vm, void* reserved)
+{
+    (void)reserved;
+    LOGD("JNI_OnLoad called");
+
+    // Load all OpenXR functions first
+    if (!load_openxr_functions()) {
+        LOGE("Failed to load OpenXR functions");
+        // Continue anyway - the app may work without VR
+    }
+
+    g_jvm = vm;
+
+    // Store JavaVM in the pojav_environ struct
+    g_pojav_environ.dalvikJavaVMPtr = vm;
+    g_pojav_environ.runtimeJavaVMPtr = vm;
+
+    // Store JavaVM in the android create info
+    g_android_create_info.applicationVM = vm;
+
+    return JNI_VERSION_1_4;
+}
+
+// Launch thread function
 struct launch_thread_args {
     JavaVM* jvm;
     jobject activity_ref;
@@ -818,6 +408,7 @@ static void* launch_thread_func(void* arg) {
     JNIEnv* env = NULL;
 
     if (jvm == NULL) {
+        LOGD("launch_thread_func: jvm is NULL, aborting");
         free(args);
         return NULL;
     }
@@ -825,10 +416,12 @@ static void* launch_thread_func(void* arg) {
     // Attach this thread to the JVM to get a valid JNIEnv
     jint attach_result = (*jvm)->AttachCurrentThread(jvm, &env, NULL);
     if (attach_result != JNI_OK || env == NULL) {
+        LOGE("launch_thread_func: AttachCurrentThread failed: %d", attach_result);
         free(args);
         return NULL;
     }
 
+    LOGD("launch_thread_func: calling activity.runCraft()");
     // Call activity.runCraft()
     (*env)->CallVoidMethod(env, args->activity_ref, args->method_id);
 
@@ -838,14 +431,17 @@ static void* launch_thread_func(void* arg) {
     // Detach from JVM
     (*jvm)->DetachCurrentThread(jvm);
     free(args);
+    LOGD("launch_thread_func: completed");
     return NULL;
 }
 
+// JNI function: net.kdt.pojavlaunch.MCXRLoader.launch(android.app.Activity)
 JNIEXPORT void JNICALL
 Java_net_kdt_pojavlaunch_MCXRLoader_launch(
     JNIEnv* env, jclass clazz, jobject activity)
 {
     (void)clazz;
+    LOGD("launch called");
 
     // Create a global reference to the activity
     jobject activityRef = (*env)->NewGlobalRef(env, activity);
@@ -857,22 +453,33 @@ Java_net_kdt_pojavlaunch_MCXRLoader_launch(
     jmethodID runCraftMethod = (*env)->GetMethodID(env, activityClass, "runCraft", "()V");
 
     if (runCraftMethod == NULL) {
-        // Clean up if method not found
+        LOGE("launch: runCraft method not found");
         (*env)->DeleteGlobalRef(env, activityRef);
         return;
     }
 
     // Create thread args
     struct launch_thread_args* args = malloc(sizeof(struct launch_thread_args));
+    if (args == NULL) {
+        LOGE("launch: malloc failed");
+        (*env)->DeleteGlobalRef(env, activityRef);
+        return;
+    }
     args->jvm = g_jvm;
     args->activity_ref = activityRef;
     args->method_id = runCraftMethod;
 
     // Create a new thread to call activity.runCraft()
-    // The new thread must attach to JVM to get its own valid JNIEnv
     pthread_t thread;
-    pthread_create(&thread, NULL, launch_thread_func, args);
+    int ret = pthread_create(&thread, NULL, launch_thread_func, args);
+    if (ret != 0) {
+        LOGE("launch: pthread_create failed: %d", ret);
+        (*env)->DeleteGlobalRef(env, activityRef);
+        free(args);
+        return;
+    }
     pthread_detach(thread);
+    LOGD("launch: thread created successfully");
 }
 
 // JNI function: net.kdt.pojavlaunch.MCXRLoader.setEGLGlobal(long, long, long)
@@ -882,6 +489,9 @@ Java_net_kdt_pojavlaunch_MCXRLoader_setEGLGlobal(
 {
     (void)clazz;
     (void)env;
+    LOGD("setEGLGlobal called: display=%p, config=%p, context=%p",
+         (void*)(intptr_t)display, (void*)(intptr_t)config, (void*)(intptr_t)context);
+
     g_egl_display = (EGLDisplay)(intptr_t)display;
     g_egl_config = (EGLConfig)(intptr_t)config;
     g_egl_context = (EGLContext)(intptr_t)context;
@@ -910,45 +520,22 @@ Java_net_kdt_pojavlaunch_MCXRLoader_setEGLGlobal__JJJ(
     Java_net_kdt_pojavlaunch_MCXRLoader_setEGLGlobal(env, clazz, display, config, context);
 }
 
-
-// ============================================================
-// Additional JNI functions matching original libopenvr_api.so
-// ============================================================
-
-// JNI_OnLoad: Called when library is loaded via System.loadLibrary
-// Stores the JavaVM pointer for later use
-JNIEXPORT jint JNICALL
-JNI_OnLoad(JavaVM* vm, void* reserved)
-{
-    (void)reserved;
-    g_jvm = vm;
-
-    // Store JavaVM in the pojav_environ struct
-    g_pojav_environ.dalvikJavaVMPtr = vm;
-    g_pojav_environ.runtimeJavaVMPtr = vm;
-
-    // Store JavaVM in the android create info
-    g_android_create_info.applicationVM = vm;
-
-    return JNI_VERSION_1_4;
-}
-
 // JNI function: net.kdt.pojavlaunch.MCXRLoader.setAndroidInitInfo(android.app.Activity)
-// Sets up the Android OpenXR initialization info
-// Must match original libopenvr_api.so behavior exactly
 JNIEXPORT void JNICALL
 Java_net_kdt_pojavlaunch_MCXRLoader_setAndroidInitInfo(
     JNIEnv* env, jclass clazz, jobject activity)
 {
     (void)clazz;
+    LOGD("setAndroidInitInfo called");
 
-    // Get JavaVM pointer from env (like original library does)
+    // Get JavaVM pointer from env
     JavaVM* jvm_local = NULL;
     (*env)->GetJavaVM(env, &jvm_local);
     if (jvm_local != NULL) {
         g_jvm = jvm_local;
         g_pojav_environ.dalvikJavaVMPtr = jvm_local;
         g_pojav_environ.runtimeJavaVMPtr = jvm_local;
+        LOGD("setAndroidInitInfo: JavaVM=%p", jvm_local);
     }
 
     // Store the activity reference
@@ -962,25 +549,30 @@ Java_net_kdt_pojavlaunch_MCXRLoader_setAndroidInitInfo(
     g_android_create_info.applicationVM = g_jvm;
     g_android_create_info.applicationActivity = activityRef;
 
-    // Try to initialize the OpenXR loader via xrInitializeLoaderKHR
-    // Use the xrGetInstanceProcAddr from the wrapper to find the function
-    void* initLoaderFunc = NULL;
-    XrResult res = xrGetInstanceProcAddr((XrInstance)0, "xrInitializeLoaderKHR", &initLoaderFunc);
+    // Initialize the OpenXR loader
+    initialize_openxr_loader((void*)g_jvm, (void*)activityRef);
+}
 
-    if (res == 0 && initLoaderFunc != NULL) {
-        // Set up loader init info struct on the stack
-        // XrLoaderInitInfoAndroidKHR layout:
-        //   offset 0: type (uint64_t)
-        //   offset 8: next (void*)
-        //   offset 16: applicationVM (void*)
-        //   offset 24: applicationActivity (void*)
-        void* loaderInfo[4];
-        loaderInfo[0] = (void*)(intptr_t)1000295000; // XR_TYPE_LOADER_INIT_INFO_ANDROID_KHR
-        loaderInfo[1] = NULL;
-        loaderInfo[2] = (void*)g_jvm;
-        loaderInfo[3] = (void*)activityRef;
+// ============================================================
+// Vulkan extension wrapper
+// ============================================================
+typedef struct VkPhysicalDeviceProperties2 {
+    void* sType;
+    void* pNext;
+    void* properties;
+} VkPhysicalDeviceProperties2;
 
-        // Call xrInitializeLoaderKHR
-        ((XrResult (*)(void*))initLoaderFunc)(loaderInfo);
+void vkGetPhysicalDeviceProperties2(void* physicalDevice, VkPhysicalDeviceProperties2* pProperties) {
+    static void (*real_fn)(void*, VkPhysicalDeviceProperties2*) = NULL;
+    if (!real_fn) {
+        void* handle = dlopen("libvulkan.so", RTLD_NOW | RTLD_GLOBAL);
+        if (handle) {
+            real_fn = (void (*)(void*, VkPhysicalDeviceProperties2*))dlsym(handle, "vkGetPhysicalDeviceProperties2");
+        }
+        if (!real_fn) {
+            // Fallback - just return without doing anything
+            return;
+        }
     }
+    real_fn(physicalDevice, pProperties);
 }
