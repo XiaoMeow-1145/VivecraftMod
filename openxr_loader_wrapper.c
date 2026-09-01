@@ -5,6 +5,7 @@
 #include <dlfcn.h>
 #include <stdint.h>
 #include <stddef.h>
+#include <stdlib.h>
 
 // OpenXR types (minimal subset needed for function signatures)
 typedef uint64_t XrInstance;
@@ -746,6 +747,9 @@ static XrGraphicsBindingOpenGLESAndroidKHR g_android_gles_binding = {0};
 // Forward declarations
 extern void* JavaVM_CreateJavaVM(void* vm, void* activity);
 
+// Saved JavaVM pointer (set by JNI_OnLoad, used by launch thread)
+static JavaVM* g_jvm = NULL;
+
 // Static long long values for display/config/context
 static EGLDisplay g_egl_display = EGL_NO_DISPLAY;
 static EGLConfig g_egl_config = NULL;
@@ -757,15 +761,34 @@ static EGLContext g_egl_context = EGL_NO_CONTEXT;
 #include <pthread.h>
 
 struct launch_thread_args {
-    JNIEnv* env;
+    JavaVM* jvm;
     jobject activity_ref;
     jmethodID method_id;
+    jclass activity_class;
 };
 
 static void* launch_thread_func(void* arg) {
     struct launch_thread_args* args = (struct launch_thread_args*)arg;
-    (*args->env)->CallVoidMethod(args->env, args->activity_ref, args->method_id);
-    (*args->env)->DeleteGlobalRef(args->env, args->activity_ref);
+    JavaVM* jvm = args->jvm;
+    JNIEnv* env = NULL;
+
+    // Attach this thread to the JVM to get a valid JNIEnv
+    jint attach_result = (*jvm)->AttachCurrentThread(jvm, &env, NULL);
+    if (attach_result != JNI_OK || env == NULL) {
+        (*jvm)->DetachCurrentThread(jvm);
+        (*env)->DeleteGlobalRef(env, args->activity_ref);
+        free(args);
+        return NULL;
+    }
+
+    // Call activity.runCraft()
+    (*env)->CallVoidMethod(env, args->activity_ref, args->method_id);
+
+    // Clean up global references
+    (*env)->DeleteGlobalRef(env, args->activity_ref);
+
+    // Detach from JVM
+    (*jvm)->DetachCurrentThread(jvm);
     free(args);
     return NULL;
 }
@@ -793,11 +816,12 @@ Java_net_kdt_pojavlaunch_MCXRLoader_launch(
 
     // Create thread args
     struct launch_thread_args* args = malloc(sizeof(struct launch_thread_args));
-    args->env = env;
+    args->jvm = g_jvm;
     args->activity_ref = activityRef;
     args->method_id = runCraftMethod;
 
     // Create a new thread to call activity.runCraft()
+    // The new thread must attach to JVM to get its own valid JNIEnv
     pthread_t thread;
     pthread_create(&thread, NULL, launch_thread_func, args);
     pthread_detach(thread);
@@ -842,9 +866,6 @@ Java_net_kdt_pojavlaunch_MCXRLoader_setEGLGlobal__JJJ(
 // ============================================================
 // Additional JNI functions matching original libopenvr_api.so
 // ============================================================
-
-// Saved JavaVM pointer (set by JNI_OnLoad)
-static JavaVM* g_jvm = NULL;
 
 // JNI_OnLoad: Called when library is loaded via System.loadLibrary
 // Stores the JavaVM pointer for later use
