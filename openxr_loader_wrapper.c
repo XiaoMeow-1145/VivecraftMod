@@ -1,9 +1,10 @@
-// OpenXR Loader Wrapper for Android (Runtime Dynamic Loading)
-// Provides JNI bridge functions for PojavLauncher MCXRLoader
-// Loads libopenxr_loader.so at runtime via dlopen/dlsym
-// All xr* functions are exported as wrapper functions that call dlsym-resolved pointers
+// OpenXR JNI Bridge for PojavLauncher MCXRLoader
+// Matches original libopenvr_api.so layout:
+// - Directly links libopenxr_loader.so (all xr* are UND imports, GLOBAL visible)
+// - Exports 3 OpenComposite_Android_* pointers (8 bytes each)
+// - Minimal JNI_OnLoad, init in setAndroidInitInfo/setEGLGlobal
+// - Also links libGLESv3.so, libvulkan.so, libm.so (same NEEDED as original)
 
-#include <dlfcn.h>
 #include <stdint.h>
 #include <stddef.h>
 #include <stdlib.h>
@@ -13,13 +14,14 @@
 #include <jni.h>
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
+#include <dlfcn.h>
 
 #define LOG_TAG "OpenXR-Wrapper"
 #define LOGD(...) __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, __VA_ARGS__)
 #define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
 
 // ============================================================
-// OpenXR types (minimal subset)
+// OpenXR types (minimal for structs)
 // ============================================================
 typedef uint64_t XrInstance;
 typedef uint64_t XrSession;
@@ -30,576 +32,368 @@ typedef uint64_t XrSwapchain;
 typedef uint64_t XrPath;
 typedef uint64_t XrTime;
 typedef uint32_t XrResult;
-typedef uint32_t XrViewConfigurationType;
-typedef uint32_t XrReferenceSpaceType;
+typedef int32_t  XrBool32;
 
-typedef struct XrInstanceCreateInfoAndroidKHR {
-    void* type;
+typedef struct XrLoaderInitInfoBaseHeaderKHR {
+    int32_t type;
     const void* next;
-    void* createFlags;
+} XrLoaderInitInfoBaseHeaderKHR;
+
+typedef struct XrLoaderInitInfoAndroidKHR {
+    XrLoaderInitInfoBaseHeaderKHR base;
+    void* applicationVM;
+    void* applicationActivity;
+} XrLoaderInitInfoAndroidKHR;
+
+// These types must match XrInstanceCreateInfoAndroidKHR / XrGraphicsBinding...
+// which are also used by OpenComposite via pointer chain
+typedef struct XrInstanceCreateInfoAndroidKHR {
+    int32_t type;
+    const void* next;
+    uint64_t createFlags;  // Actually XrInstanceCreateFlags (uint64_t)
     void* applicationVM;
     void* applicationActivity;
 } XrInstanceCreateInfoAndroidKHR;
 
 typedef struct XrGraphicsBindingOpenGLESAndroidKHR {
-    void* type;
+    int32_t type;
     const void* next;
-    void* display;
-    void* config;
-    void* context;
+    void* display;   // EGLDisplay
+    void* config;    // EGLConfig
+    void* context;   // EGLContext
 } XrGraphicsBindingOpenGLESAndroidKHR;
 
-// XrLoaderInitInfoBaseHeaderKHR - base header for loader init info
-typedef struct XrLoaderInitInfoBaseHeaderKHR {
-    int32_t type;       // XrStructureType (32-bit enum)
-    const void* next;   // next in chain (8 bytes, aligned to 8)
-    // Note: on ARM64, there's 4 bytes of padding between type and next
-} XrLoaderInitInfoBaseHeaderKHR;
+// ============================================================
+// OpenXR function declarations - imported from libopenxr_loader.so
+// Must match OpenXR C API exactly - these will be GLOBAL UND
+// ============================================================
+#define XR_API
+typedef XrResult (XR_API *PFN_xrVoidFunction)(void);
 
-// XrLoaderInitInfoAndroidKHR - Android-specific loader init info
-typedef struct XrLoaderInitInfoAndroidKHR {
-    XrLoaderInitInfoBaseHeaderKHR base;  // 16 bytes (4 + 4 padding + 8)
-    void* applicationVM;                 // 8 bytes
-    void* applicationActivity;           // 8 bytes
-} XrLoaderInitInfoAndroidKHR;
+extern XrResult xrGetInstanceProcAddr(XrInstance instance, const char* name, PFN_xrVoidFunction* function);
+extern XrResult xrCreateInstance(const void* createInfo, XrInstance* instance);
+extern XrResult xrDestroyInstance(XrInstance instance);
+extern XrResult xrEnumerateApiLayerProperties(uint32_t propertyCapacityInput, uint32_t* propertyCountOutput, void* properties);
+extern XrResult xrEnumerateInstanceExtensionProperties(const char* layerName, uint32_t propertyCapacityInput, uint32_t* propertyCountOutput, void* properties);
+extern XrResult xrGetSystem(XrInstance instance, const void* getInfo, uint64_t* systemId);
+extern XrResult xrGetSystemProperties(XrInstance instance, uint64_t systemId, void* properties);
+extern XrResult xrCreateSession(XrInstance instance, const void* createInfo, XrSession* session);
+extern XrResult xrDestroySession(XrSession session);
+extern XrResult xrBeginSession(XrSession session, const void* beginInfo);
+extern XrResult xrEndSession(XrSession session);
+extern XrResult xrRequestExitSession(XrSession session);
+extern XrResult xrWaitFrame(XrSession session, const void* frameWaitInfo, void* frameState);
+extern XrResult xrBeginFrame(XrSession session, const void* frameBeginInfo);
+extern XrResult xrEndFrame(XrSession session, const void* frameEndInfo);
+extern XrResult xrCreateReferenceSpace(XrSession session, const void* createInfo, XrSpace* space);
+extern XrResult xrDestroySpace(XrSpace space);
+extern XrResult xrLocateSpace(XrSpace space, XrSpace baseSpace, XrTime time, void* location);
+extern XrResult xrCreateActionSet(XrInstance instance, const void* createInfo, XrActionSet* actionSet);
+extern XrResult xrDestroyActionSet(XrActionSet actionSet);
+extern XrResult xrCreateAction(XrActionSet actionSet, const void* createInfo, XrAction* action);
+extern XrResult xrDestroyAction(XrAction action);
+extern XrResult xrSuggestInteractionProfileBindings(XrInstance instance, const void* suggestedBindings);
+extern XrResult xrAttachSessionActionSets(XrSession session, const void* attachInfo);
+extern XrResult xrSyncActions(XrSession session, const void* syncInfo);
+extern XrResult xrEnumerateBoundSourcesForAction(XrSession session, const void* enumerateInfo, uint32_t sourceCapacityInput, uint32_t* sourceCountOutput, void* sources);
+extern XrResult xrGetCurrentInteractionProfile(XrSession session, XrPath topLevelUserPath, void* interactionProfile);
+extern XrResult xrGetActionStateBoolean(XrSession session, const void* getInfo, void* state);
+extern XrResult xrGetActionStateFloat(XrSession session, const void* getInfo, void* state);
+extern XrResult xrGetActionStateVector2f(XrSession session, const void* getInfo, void* state);
+extern XrResult xrStringToPath(XrInstance instance, const char* pathString, XrPath* path);
+extern XrResult xrPathToString(XrInstance instance, XrPath path, uint32_t bufferCapacityInput, uint32_t* bufferCountOutput, char* buffer);
+extern XrResult xrPollEvent(XrInstance instance, void* eventData);
+extern XrResult xrResultToString(XrInstance instance, XrResult value, void* buffer);
+extern XrResult xrCreateSwapchain(XrSession session, const void* createInfo, XrSwapchain* swapchain);
+extern XrResult xrDestroySwapchain(XrSwapchain swapchain);
+extern XrResult xrEnumerateSwapchainFormats(XrSession session, uint32_t formatCapacityInput, uint32_t* formatCountOutput, int64_t* formats);
+extern XrResult xrEnumerateSwapchainImages(XrSwapchain swapchain, uint32_t imageCapacityInput, uint32_t* imageCountOutput, void* images);
+extern XrResult xrAcquireSwapchainImage(XrSwapchain swapchain, const void* acquireInfo, uint32_t* index);
+extern XrResult xrWaitSwapchainImage(XrSwapchain swapchain, const void* waitInfo);
+extern XrResult xrReleaseSwapchainImage(XrSwapchain swapchain, const void* releaseInfo);
+extern XrResult xrEnumerateViewConfigurationViews(XrInstance instance, uint64_t systemId, uint32_t viewConfigurationType, uint32_t viewCapacityInput, uint32_t* viewCountOutput, void* views);
+extern XrResult xrLocateViews(XrSession session, const void* viewLocateInfo, void* viewState, uint32_t viewCapacityInput, uint32_t* viewCountOutput, void* views);
+extern XrResult xrApplyHapticFeedback(XrSession session, const void* hapticActionInfo, const void* hapticFeedback);
+extern XrResult xrGetReferenceSpaceBoundsRect(XrSession session, uint32_t referenceSpaceType, void* bounds);
+extern XrResult xrCreateActionSpace(XrSession session, const void* createInfo, XrSpace* space);
+extern XrResult xrEnumerateReferenceSpaces(XrSession session, uint32_t spaceCapacityInput, uint32_t* spaceCountOutput, uint32_t* spaces);
+extern XrResult xrGetViewConfigurationProperties(XrInstance instance, uint64_t systemId, uint32_t viewConfigurationType, void* configurationProperties);
+extern XrResult xrGetInputSourceLocalizedName(XrSession session, const void* getInfo, uint32_t bufferCapacityInput, uint32_t* bufferCountOutput, char* buffer);
+extern XrResult xrGetActionStatePose(XrSession session, const void* getInfo, void* state);
+extern XrResult xrStopHapticFeedback(XrSession session, const void* hapticActionInfo);
+extern XrResult xrEnumerateEnvironmentBlendModes(XrInstance instance, uint64_t systemId, uint32_t viewConfigurationType, uint32_t blendModeCapacityInput, uint32_t* blendModeCountOutput, uint32_t* blendModes);
+extern XrResult xrStructureTypeToString(XrInstance instance, int32_t structureType, void* buffer);
 
 // ============================================================
-// OpenXR loader handle and function pointer table
+// Force all xr* symbols to be referenced so they appear as GLOBAL UND imports
+// This ensures OpenComposite (loaded later) can resolve them through our library
 // ============================================================
-static void* g_openxr_handle = NULL;
+static const void* _xr_symbol_refs[] = {
+    (const void*)&xrGetInstanceProcAddr,
+    (const void*)&xrCreateInstance,
+    (const void*)&xrDestroyInstance,
+    (const void*)&xrEnumerateApiLayerProperties,
+    (const void*)&xrEnumerateInstanceExtensionProperties,
+    (const void*)&xrGetSystem,
+    (const void*)&xrGetSystemProperties,
+    (const void*)&xrCreateSession,
+    (const void*)&xrDestroySession,
+    (const void*)&xrBeginSession,
+    (const void*)&xrEndSession,
+    (const void*)&xrRequestExitSession,
+    (const void*)&xrWaitFrame,
+    (const void*)&xrBeginFrame,
+    (const void*)&xrEndFrame,
+    (const void*)&xrCreateReferenceSpace,
+    (const void*)&xrDestroySpace,
+    (const void*)&xrLocateSpace,
+    (const void*)&xrCreateActionSet,
+    (const void*)&xrDestroyActionSet,
+    (const void*)&xrCreateAction,
+    (const void*)&xrDestroyAction,
+    (const void*)&xrSuggestInteractionProfileBindings,
+    (const void*)&xrAttachSessionActionSets,
+    (const void*)&xrSyncActions,
+    (const void*)&xrEnumerateBoundSourcesForAction,
+    (const void*)&xrGetCurrentInteractionProfile,
+    (const void*)&xrGetActionStateBoolean,
+    (const void*)&xrGetActionStateFloat,
+    (const void*)&xrGetActionStateVector2f,
+    (const void*)&xrStringToPath,
+    (const void*)&xrPathToString,
+    (const void*)&xrPollEvent,
+    (const void*)&xrResultToString,
+    (const void*)&xrCreateSwapchain,
+    (const void*)&xrDestroySwapchain,
+    (const void*)&xrEnumerateSwapchainFormats,
+    (const void*)&xrEnumerateSwapchainImages,
+    (const void*)&xrAcquireSwapchainImage,
+    (const void*)&xrWaitSwapchainImage,
+    (const void*)&xrReleaseSwapchainImage,
+    (const void*)&xrEnumerateViewConfigurationViews,
+    (const void*)&xrLocateViews,
+    (const void*)&xrApplyHapticFeedback,
+    (const void*)&xrGetReferenceSpaceBoundsRect,
+    (const void*)&xrCreateActionSpace,
+    (const void*)&xrEnumerateReferenceSpaces,
+    (const void*)&xrGetViewConfigurationProperties,
+    (const void*)&xrGetInputSourceLocalizedName,
+    (const void*)&xrGetActionStatePose,
+    (const void*)&xrStopHapticFeedback,
+    (const void*)&xrEnumerateEnvironmentBlendModes,
+    (const void*)&xrStructureTypeToString,
+};
 
-// Macro to declare a function pointer type and a static pointer
-#define XR_FUNC_DECL(ret, name, ...) \
-    typedef ret (*name##_fn)(__VA_ARGS__); \
-    static name##_fn g_##name = NULL;
-
-// Declare all xr* function pointers
-XR_FUNC_DECL(XrResult, xrGetInstanceProcAddr, XrInstance, const char*, void**)
-XR_FUNC_DECL(XrResult, xrCreateInstance, const void*, void*)
-XR_FUNC_DECL(XrResult, xrDestroyInstance, XrInstance)
-XR_FUNC_DECL(XrResult, xrEnumerateApiLayerProperties, uint32_t, uint32_t*, void*)
-XR_FUNC_DECL(XrResult, xrEnumerateInstanceExtensionProperties, const char*, uint32_t, uint32_t*, void*)
-XR_FUNC_DECL(XrResult, xrGetSystem, XrInstance, const void*, void*)
-XR_FUNC_DECL(XrResult, xrGetSystemProperties, XrInstance, uint64_t, void*)
-XR_FUNC_DECL(XrResult, xrCreateSession, XrInstance, const void*, void*)
-XR_FUNC_DECL(XrResult, xrDestroySession, XrSession)
-XR_FUNC_DECL(XrResult, xrBeginSession, XrSession, const void*)
-XR_FUNC_DECL(XrResult, xrEndSession, XrSession)
-XR_FUNC_DECL(XrResult, xrRequestExitSession, XrSession)
-XR_FUNC_DECL(XrResult, xrWaitFrame, XrSession, const void*, void*)
-XR_FUNC_DECL(XrResult, xrBeginFrame, XrSession, const void*)
-XR_FUNC_DECL(XrResult, xrEndFrame, XrSession, const void*)
-XR_FUNC_DECL(XrResult, xrCreateReferenceSpace, XrSession, const void*, void*)
-XR_FUNC_DECL(XrResult, xrDestroySpace, XrSpace)
-XR_FUNC_DECL(XrResult, xrLocateSpace, XrSpace, XrSpace, XrTime, void*)
-XR_FUNC_DECL(XrResult, xrCreateActionSet, XrInstance, const void*, void*)
-XR_FUNC_DECL(XrResult, xrDestroyActionSet, XrActionSet)
-XR_FUNC_DECL(XrResult, xrCreateAction, XrActionSet, const void*, void*)
-XR_FUNC_DECL(XrResult, xrDestroyAction, XrAction)
-XR_FUNC_DECL(XrResult, xrSuggestInteractionProfileBindings, XrInstance, const void*)
-XR_FUNC_DECL(XrResult, xrAttachSessionActionSets, XrSession, const void*)
-XR_FUNC_DECL(XrResult, xrSyncActions, XrSession, const void*)
-XR_FUNC_DECL(XrResult, xrEnumerateBoundSourcesForAction, XrSession, const void*, uint32_t, uint32_t*, void*)
-XR_FUNC_DECL(XrResult, xrGetCurrentInteractionProfile, XrSession, XrPath, void*)
-XR_FUNC_DECL(XrResult, xrGetActionStateBoolean, XrSession, const void*, void*)
-XR_FUNC_DECL(XrResult, xrGetActionStateFloat, XrSession, const void*, void*)
-XR_FUNC_DECL(XrResult, xrGetActionStateVector2f, XrSession, const void*, void*)
-XR_FUNC_DECL(XrResult, xrStringToPath, XrInstance, const char*, void*)
-XR_FUNC_DECL(XrResult, xrPathToString, XrInstance, XrPath, uint32_t, uint32_t*, char*)
-XR_FUNC_DECL(XrResult, xrPollEvent, XrInstance, void*)
-XR_FUNC_DECL(XrResult, xrResultToString, XrInstance, XrResult, void*)
-XR_FUNC_DECL(XrResult, xrCreateSwapchain, XrSession, const void*, void*)
-XR_FUNC_DECL(XrResult, xrDestroySwapchain, XrSwapchain)
-XR_FUNC_DECL(XrResult, xrEnumerateSwapchainFormats, XrSession, uint32_t, uint32_t*, void*)
-XR_FUNC_DECL(XrResult, xrEnumerateSwapchainImages, XrSwapchain, uint32_t, uint32_t*, void*)
-XR_FUNC_DECL(XrResult, xrAcquireSwapchainImage, XrSwapchain, const void*, void*)
-XR_FUNC_DECL(XrResult, xrWaitSwapchainImage, XrSwapchain, const void*)
-XR_FUNC_DECL(XrResult, xrReleaseSwapchainImage, XrSwapchain, const void*)
-XR_FUNC_DECL(XrResult, xrEnumerateViewConfigurationViews, XrInstance, uint64_t, XrViewConfigurationType, uint32_t, uint32_t*, void*)
-XR_FUNC_DECL(XrResult, xrLocateViews, XrSession, const void*, void*, uint32_t, uint32_t*, void*)
-XR_FUNC_DECL(XrResult, xrApplyHapticFeedback, XrSession, const void*, const void*)
-XR_FUNC_DECL(XrResult, xrGetReferenceSpaceBoundsRect, XrSession, XrReferenceSpaceType, void*)
-XR_FUNC_DECL(XrResult, xrCreateActionSpace, XrSession, const void*, void*)
-XR_FUNC_DECL(XrResult, xrEnumerateReferenceSpaces, XrSession, uint32_t, uint32_t*, void*)
-XR_FUNC_DECL(XrResult, xrGetViewConfigurationProperties, XrInstance, uint64_t, XrViewConfigurationType, void*)
-XR_FUNC_DECL(XrResult, xrGetInputSourceLocalizedName, XrSession, const void*, uint32_t, uint32_t*, char*)
-XR_FUNC_DECL(XrResult, xrGetActionStatePose, XrSession, const void*, void*)
-XR_FUNC_DECL(XrResult, xrStopHapticFeedback, XrSession, const void*)
-XR_FUNC_DECL(XrResult, xrEnumerateEnvironmentBlendModes, XrInstance, uint64_t, XrViewConfigurationType, uint32_t, uint32_t*, void*)
-XR_FUNC_DECL(XrResult, xrStructureTypeToString, XrInstance, void*, void*)
-
-// ============================================================
-// Load all xr* function pointers from libopenxr_loader.so
-// ============================================================
-static int load_openxr_functions(void) {
-    if (g_openxr_handle) return 1; // Already loaded
-
-    LOGD("Loading libopenxr_loader.so...");
-    g_openxr_handle = dlopen("libopenxr_loader.so", RTLD_NOW | RTLD_GLOBAL);
-    if (!g_openxr_handle) {
-        LOGE("Failed to load libopenxr_loader.so: %s", dlerror());
-        return 0;
-    }
-    LOGD("libopenxr_loader.so loaded at %p", g_openxr_handle);
-
-    // Macro to resolve a function by name
-    #define RESOLVE(name) do { \
-        g_##name = (name##_fn)dlsym(g_openxr_handle, #name); \
-        if (!g_##name) { \
-            LOGE("Failed to resolve %s: %s", #name, dlerror()); \
-            return 0; \
-        } \
-        LOGD("  Resolved %s -> %p", #name, g_##name); \
-    } while(0)
-
-    // Resolve all xr* functions
-    RESOLVE(xrGetInstanceProcAddr);
-    RESOLVE(xrCreateInstance);
-    RESOLVE(xrDestroyInstance);
-    RESOLVE(xrEnumerateApiLayerProperties);
-    RESOLVE(xrEnumerateInstanceExtensionProperties);
-    RESOLVE(xrGetSystem);
-    RESOLVE(xrGetSystemProperties);
-    RESOLVE(xrCreateSession);
-    RESOLVE(xrDestroySession);
-    RESOLVE(xrBeginSession);
-    RESOLVE(xrEndSession);
-    RESOLVE(xrRequestExitSession);
-    RESOLVE(xrWaitFrame);
-    RESOLVE(xrBeginFrame);
-    RESOLVE(xrEndFrame);
-    RESOLVE(xrCreateReferenceSpace);
-    RESOLVE(xrDestroySpace);
-    RESOLVE(xrLocateSpace);
-    RESOLVE(xrCreateActionSet);
-    RESOLVE(xrDestroyActionSet);
-    RESOLVE(xrCreateAction);
-    RESOLVE(xrDestroyAction);
-    RESOLVE(xrSuggestInteractionProfileBindings);
-    RESOLVE(xrAttachSessionActionSets);
-    RESOLVE(xrSyncActions);
-    RESOLVE(xrEnumerateBoundSourcesForAction);
-    RESOLVE(xrGetCurrentInteractionProfile);
-    RESOLVE(xrGetActionStateBoolean);
-    RESOLVE(xrGetActionStateFloat);
-    RESOLVE(xrGetActionStateVector2f);
-    RESOLVE(xrStringToPath);
-    RESOLVE(xrPathToString);
-    RESOLVE(xrPollEvent);
-    RESOLVE(xrResultToString);
-    RESOLVE(xrCreateSwapchain);
-    RESOLVE(xrDestroySwapchain);
-    RESOLVE(xrEnumerateSwapchainFormats);
-    RESOLVE(xrEnumerateSwapchainImages);
-    RESOLVE(xrAcquireSwapchainImage);
-    RESOLVE(xrWaitSwapchainImage);
-    RESOLVE(xrReleaseSwapchainImage);
-    RESOLVE(xrEnumerateViewConfigurationViews);
-    RESOLVE(xrLocateViews);
-    RESOLVE(xrApplyHapticFeedback);
-    RESOLVE(xrGetReferenceSpaceBoundsRect);
-    RESOLVE(xrCreateActionSpace);
-    RESOLVE(xrEnumerateReferenceSpaces);
-    RESOLVE(xrGetViewConfigurationProperties);
-    RESOLVE(xrGetInputSourceLocalizedName);
-    RESOLVE(xrGetActionStatePose);
-    RESOLVE(xrStopHapticFeedback);
-    RESOLVE(xrEnumerateEnvironmentBlendModes);
-    RESOLVE(xrStructureTypeToString);
-
-    LOGD("All xr* functions resolved successfully");
-    return 1;
+// Touch the array in a function called at JNI_OnLoad to prevent dead stripping
+static void _touch_xr_refs(void) {
+    volatile const void* p = _xr_symbol_refs[0];
+    (void)p;
+    // Make sure the array isn't optimized away
+    __asm__ __volatile__("" : : "r"(_xr_symbol_refs) : "memory");
 }
 
 // ============================================================
-// Define wrapper functions that export as real symbols
-// Macro: pass signature in (params) and args in (call_args)
+// Vulkan functions (imported from libvulkan.so - for GLOBAL UND entries)
+// Matches original's 3 UND vk symbols
 // ============================================================
-#define XR_FUNC_WRAPPER(ret, name, params, call_args) \
-    ret name params { return g_##name call_args; }
+extern void vkGetPhysicalDeviceProperties2(void* physicalDevice, void* pProperties);
+extern void vkGetDeviceQueue(void* device, uint32_t queueFamilyIndex, uint32_t queueIndex, void* pQueue);
+extern void vkGetPhysicalDeviceQueueFamilyProperties(void* physicalDevice, uint32_t* pQueueFamilyPropertyCount, void* pQueueFamilyProperties);
 
-// Define all xr* wrapper functions
-XR_FUNC_WRAPPER(XrResult, xrGetInstanceProcAddr, (XrInstance instance, const char* name, void** functionPtr), (instance, name, functionPtr))
-XR_FUNC_WRAPPER(XrResult, xrCreateInstance, (const void* createInfo, void* instance), (createInfo, instance))
-XR_FUNC_WRAPPER(XrResult, xrDestroyInstance, (XrInstance instance), (instance))
-XR_FUNC_WRAPPER(XrResult, xrEnumerateApiLayerProperties, (uint32_t propertyCapacityInput, uint32_t* propertyCountOutput, void* properties), (propertyCapacityInput, propertyCountOutput, properties))
-XR_FUNC_WRAPPER(XrResult, xrEnumerateInstanceExtensionProperties, (const char* layerName, uint32_t propertyCapacityInput, uint32_t* propertyCountOutput, void* properties), (layerName, propertyCapacityInput, propertyCountOutput, properties))
-XR_FUNC_WRAPPER(XrResult, xrGetSystem, (XrInstance instance, const void* getInfo, void* systemId), (instance, getInfo, systemId))
-XR_FUNC_WRAPPER(XrResult, xrGetSystemProperties, (XrInstance instance, uint64_t systemId, void* properties), (instance, systemId, properties))
-XR_FUNC_WRAPPER(XrResult, xrCreateSession, (XrInstance instance, const void* createInfo, void* session), (instance, createInfo, session))
-XR_FUNC_WRAPPER(XrResult, xrDestroySession, (XrSession session), (session))
-XR_FUNC_WRAPPER(XrResult, xrBeginSession, (XrSession session, const void* beginInfo), (session, beginInfo))
-XR_FUNC_WRAPPER(XrResult, xrEndSession, (XrSession session), (session))
-XR_FUNC_WRAPPER(XrResult, xrRequestExitSession, (XrSession session), (session))
-XR_FUNC_WRAPPER(XrResult, xrWaitFrame, (XrSession session, const void* frameWaitInfo, void* frameState), (session, frameWaitInfo, frameState))
-XR_FUNC_WRAPPER(XrResult, xrBeginFrame, (XrSession session, const void* frameBeginInfo), (session, frameBeginInfo))
-XR_FUNC_WRAPPER(XrResult, xrEndFrame, (XrSession session, const void* frameEndInfo), (session, frameEndInfo))
-XR_FUNC_WRAPPER(XrResult, xrCreateReferenceSpace, (XrSession session, const void* createInfo, void* space), (session, createInfo, space))
-XR_FUNC_WRAPPER(XrResult, xrDestroySpace, (XrSpace space), (space))
-XR_FUNC_WRAPPER(XrResult, xrLocateSpace, (XrSpace space, XrSpace baseSpace, XrTime time, void* location), (space, baseSpace, time, location))
-XR_FUNC_WRAPPER(XrResult, xrCreateActionSet, (XrInstance instance, const void* createInfo, void* actionSet), (instance, createInfo, actionSet))
-XR_FUNC_WRAPPER(XrResult, xrDestroyActionSet, (XrActionSet actionSet), (actionSet))
-XR_FUNC_WRAPPER(XrResult, xrCreateAction, (XrActionSet actionSet, const void* createInfo, void* action), (actionSet, createInfo, action))
-XR_FUNC_WRAPPER(XrResult, xrDestroyAction, (XrAction action), (action))
-XR_FUNC_WRAPPER(XrResult, xrSuggestInteractionProfileBindings, (XrInstance instance, const void* suggestedBindings), (instance, suggestedBindings))
-XR_FUNC_WRAPPER(XrResult, xrAttachSessionActionSets, (XrSession session, const void* attachInfo), (session, attachInfo))
-XR_FUNC_WRAPPER(XrResult, xrSyncActions, (XrSession session, const void* syncInfo), (session, syncInfo))
-XR_FUNC_WRAPPER(XrResult, xrEnumerateBoundSourcesForAction, (XrSession session, const void* enumerateInfo, uint32_t sourceCapacityInput, uint32_t* sourceCountOutput, void* sources), (session, enumerateInfo, sourceCapacityInput, sourceCountOutput, sources))
-XR_FUNC_WRAPPER(XrResult, xrGetCurrentInteractionProfile, (XrSession session, XrPath topLevelUserPath, void* interactionProfile), (session, topLevelUserPath, interactionProfile))
-XR_FUNC_WRAPPER(XrResult, xrGetActionStateBoolean, (XrSession session, const void* getInfo, void* state), (session, getInfo, state))
-XR_FUNC_WRAPPER(XrResult, xrGetActionStateFloat, (XrSession session, const void* getInfo, void* state), (session, getInfo, state))
-XR_FUNC_WRAPPER(XrResult, xrGetActionStateVector2f, (XrSession session, const void* getInfo, void* state), (session, getInfo, state))
-XR_FUNC_WRAPPER(XrResult, xrStringToPath, (XrInstance instance, const char* pathString, void* path), (instance, pathString, path))
-XR_FUNC_WRAPPER(XrResult, xrPathToString, (XrInstance instance, XrPath path, uint32_t bufferCapacityInput, uint32_t* bufferCountOutput, char* buffer), (instance, path, bufferCapacityInput, bufferCountOutput, buffer))
-XR_FUNC_WRAPPER(XrResult, xrPollEvent, (XrInstance instance, void* eventData), (instance, eventData))
-XR_FUNC_WRAPPER(XrResult, xrResultToString, (XrInstance instance, XrResult value, void* buffer), (instance, value, buffer))
-XR_FUNC_WRAPPER(XrResult, xrCreateSwapchain, (XrSession session, const void* createInfo, void* swapchain), (session, createInfo, swapchain))
-XR_FUNC_WRAPPER(XrResult, xrDestroySwapchain, (XrSwapchain swapchain), (swapchain))
-XR_FUNC_WRAPPER(XrResult, xrEnumerateSwapchainFormats, (XrSession session, uint32_t formatCapacityInput, uint32_t* formatCountOutput, void* formats), (session, formatCapacityInput, formatCountOutput, formats))
-XR_FUNC_WRAPPER(XrResult, xrEnumerateSwapchainImages, (XrSwapchain swapchain, uint32_t imageCapacityInput, uint32_t* imageCountOutput, void* images), (swapchain, imageCapacityInput, imageCountOutput, images))
-XR_FUNC_WRAPPER(XrResult, xrAcquireSwapchainImage, (XrSwapchain swapchain, const void* acquireInfo, void* index), (swapchain, acquireInfo, index))
-XR_FUNC_WRAPPER(XrResult, xrWaitSwapchainImage, (XrSwapchain swapchain, const void* waitInfo), (swapchain, waitInfo))
-XR_FUNC_WRAPPER(XrResult, xrReleaseSwapchainImage, (XrSwapchain swapchain, const void* releaseInfo), (swapchain, releaseInfo))
-XR_FUNC_WRAPPER(XrResult, xrEnumerateViewConfigurationViews, (XrInstance instance, uint64_t systemId, XrViewConfigurationType viewConfigurationType, uint32_t viewCapacityInput, uint32_t* viewCountOutput, void* views), (instance, systemId, viewConfigurationType, viewCapacityInput, viewCountOutput, views))
-XR_FUNC_WRAPPER(XrResult, xrLocateViews, (XrSession session, const void* viewLocateInfo, void* viewState, uint32_t viewCapacityInput, uint32_t* viewCountOutput, void* views), (session, viewLocateInfo, viewState, viewCapacityInput, viewCountOutput, views))
-XR_FUNC_WRAPPER(XrResult, xrApplyHapticFeedback, (XrSession session, const void* hapticActionInfo, const void* hapticFeedback), (session, hapticActionInfo, hapticFeedback))
-XR_FUNC_WRAPPER(XrResult, xrGetReferenceSpaceBoundsRect, (XrSession session, XrReferenceSpaceType referenceSpaceType, void* bounds), (session, referenceSpaceType, bounds))
-XR_FUNC_WRAPPER(XrResult, xrCreateActionSpace, (XrSession session, const void* createInfo, void* space), (session, createInfo, space))
-XR_FUNC_WRAPPER(XrResult, xrEnumerateReferenceSpaces, (XrSession session, uint32_t spaceCapacityInput, uint32_t* spaceCountOutput, void* spaces), (session, spaceCapacityInput, spaceCountOutput, spaces))
-XR_FUNC_WRAPPER(XrResult, xrGetViewConfigurationProperties, (XrInstance instance, uint64_t systemId, XrViewConfigurationType viewConfigurationType, void* configurationProperties), (instance, systemId, viewConfigurationType, configurationProperties))
-XR_FUNC_WRAPPER(XrResult, xrGetInputSourceLocalizedName, (XrSession session, const void* getInfo, uint32_t bufferCapacityInput, uint32_t* bufferCountOutput, char* buffer), (session, getInfo, bufferCapacityInput, bufferCountOutput, buffer))
-XR_FUNC_WRAPPER(XrResult, xrGetActionStatePose, (XrSession session, const void* getInfo, void* state), (session, getInfo, state))
-XR_FUNC_WRAPPER(XrResult, xrStopHapticFeedback, (XrSession session, const void* hapticActionInfo), (session, hapticActionInfo))
-XR_FUNC_WRAPPER(XrResult, xrEnumerateEnvironmentBlendModes, (XrInstance instance, uint64_t systemId, XrViewConfigurationType viewConfigurationType, uint32_t blendModeCapacityInput, uint32_t* blendModeCountOutput, void* blendModes), (instance, systemId, viewConfigurationType, blendModeCapacityInput, blendModeCountOutput, blendModes))
-XR_FUNC_WRAPPER(XrResult, xrStructureTypeToString, (XrInstance instance, void* structureType, void* buffer), (instance, structureType, buffer))
+static const void* _vk_refs[] = {
+    (const void*)&vkGetPhysicalDeviceProperties2,
+    (const void*)&vkGetDeviceQueue,
+    (const void*)&vkGetPhysicalDeviceQueueFamilyProperties,
+};
+static void _touch_vk_refs(void) {
+    __asm__ __volatile__("" : : "r"(_vk_refs) : "memory");
+}
 
 // ============================================================
-// Android extern variables - set by OpenComposite at runtime
+// Static storage - backing structs for OpenComposite pointers
 // ============================================================
-XrInstanceCreateInfoAndroidKHR* OpenComposite_Android_Create_Info = NULL;
-XrGraphicsBindingOpenGLESAndroidKHR* OpenComposite_Android_GLES_Binding_Info = NULL;
+static JavaVM* s_jvm = NULL;
 
-// ============================================================
-// pojav_environ struct (from environ.h)
-// ============================================================
-typedef struct {
-    void* eventCounter;
-    void* events;
-    void* outEventIndex;
-    void* outTargetIndex;
-    void* inEventIndex;
-    void* inEventCount;
-    double cursorX, cursorY, cLastX, cLastY;
-    void* method_accessAndroidClipboard;
-    void* method_onGrabStateChanged;
-    void* method_glftSetWindowAttrib;
-    void* method_internalWindowSizeChanged;
-    void* bridgeClazz;
-    void* vmGlfwClass;
-    int isGrabbing;
-    void* keyDownBuffer;
-    void* mouseDownBuffer;
-    void* runtimeJavaVMPtr;
-    void* runtimeJNIEnvPtr_JRE;
-    void* dalvikJavaVMPtr;
-    void* dalvikJNIEnvPtr_ANDROID;
-    void* activity;
-    XrInstanceCreateInfoAndroidKHR* OpenComposite_Android_Create_Info;
-    XrGraphicsBindingOpenGLESAndroidKHR* OpenComposite_Android_GLES_Binding_Info;
-    long showingWindow;
-    int isInputReady, isCursorEntered, isUseStackQueueCall, shouldUpdateMouse;
-    int savedWidth, savedHeight;
-    void* GLFW_invoke_Char;
-    void* GLFW_invoke_CharMods;
-    void* GLFW_invoke_CursorEnter;
-    void* GLFW_invoke_CursorPos;
-    void* GLFW_invoke_FramebufferSize;
-    void* GLFW_invoke_Key;
-    void* GLFW_invoke_MouseButton;
-    void* GLFW_invoke_Scroll;
-    void* GLFW_invoke_WindowSize;
-} pojav_environ_s;
+// XrInstanceCreateInfoAndroidKHR - stored here, pointer exported
+static XrInstanceCreateInfoAndroidKHR s_android_create_info = {
+    1000296000,   // type: XR_TYPE_INSTANCE_CREATE_INFO_ANDROID_KHR
+    NULL,         // next
+    0,            // createFlags
+    NULL,         // applicationVM
+    NULL,         // applicationActivity
+};
 
-// pojav_environ instance
-static pojav_environ_s g_pojav_environ = {0};
-pojav_environ_s *pojav_environ = &g_pojav_environ;
+// XrGraphicsBindingOpenGLESAndroidKHR - stored here, pointer exported
+static XrGraphicsBindingOpenGLESAndroidKHR s_android_gles_binding = {
+    1000296001,   // type: XR_TYPE_GRAPHICS_BINDING_OPENGL_ES_ANDROID_KHR
+    NULL,         // next
+    NULL, NULL, NULL,
+};
 
 // ============================================================
-// Android OpenXR data instances
-// ============================================================
-static XrInstanceCreateInfoAndroidKHR g_android_create_info = {0};
-static XrGraphicsBindingOpenGLESAndroidKHR g_android_gles_binding = {0};
+// EXPORTED 8-byte pointers (OBJECT) - exactly like the original
+// OpenComposite reads these directly when doing xrCreateInstance / xrCreateSession
+// "Load Input File" callback (Android file loader for OpenComposite)
+typedef size_t (*AndroidLoadInputFileFn)(const char* path, char* outBuf, size_t bufSize);
 
-// Forward declarations
-extern void* JavaVM_CreateJavaVM(void* vm, void* activity);
-
-// Saved JavaVM pointer
-static JavaVM* g_jvm = NULL;
-
-// Static EGL values for display/config/context
-static EGLDisplay g_egl_display = EGL_NO_DISPLAY;
-static EGLConfig g_egl_config = NULL;
-static EGLContext g_egl_context = EGL_NO_CONTEXT;
-static int g_openxr_loader_initialized = 0;
+void* OpenComposite_Android_Create_Info = &s_android_create_info;
+void* OpenComposite_Android_GLES_Binding_Info = &s_android_gles_binding;
+void* OpenComposite_Android_Load_Input_File = NULL;
 
 // ============================================================
-// xrInitializeLoaderKHR - special handling
-// The function has C++ name mangling in the loader, so we find
-// it via xrGetInstanceProcAddr (which is an unmangled C symbol)
-// We also try the mangled C++ name directly via dlsym as fallback
+// Initialize xrInitializeLoaderKHR - using xrGetInstanceProcAddr
 // ============================================================
-static void initialize_openxr_loader(void* jvm, void* activity) {
-    if (g_openxr_loader_initialized) return;
-    g_openxr_loader_initialized = 1;
+static void s_call_xrInitializeLoaderKHR(void* jvm, void* activity) {
+    LOGD("Calling xrInitializeLoaderKHR via xrGetInstanceProcAddr...");
 
-    LOGD("Initializing OpenXR loader...");
-
-    // Try to find xrInitializeLoaderKHR via xrGetInstanceProcAddr first
-    void* initLoaderFunc = NULL;
-    XrResult res = xrGetInstanceProcAddr((XrInstance)0, "xrInitializeLoaderKHR", &initLoaderFunc);
-
-    // If not found, try the mangled C++ name directly
-    if (res != 0 || initLoaderFunc == NULL) {
-        LOGD("Trying mangled name _Z21xrInitializeLoaderKHRPK29XrLoaderInitInfoBaseHeaderKHR");
-        initLoaderFunc = dlsym(g_openxr_handle, "_Z21xrInitializeLoaderKHRPK29XrLoaderInitInfoBaseHeaderKHR");
-        if (initLoaderFunc) {
-            LOGD("Found xrInitializeLoaderKHR via mangled dlsym");
-        }
+    PFN_xrVoidFunction initFunc = NULL;
+    XrResult res = xrGetInstanceProcAddr((XrInstance)0, "xrInitializeLoaderKHR", &initFunc);
+    if (res != 0 || initFunc == NULL) {
+        // Try mangled name via dlsym
+        initFunc = (PFN_xrVoidFunction)dlsym(RTLD_DEFAULT, "_Z21xrInitializeLoaderKHRPK29XrLoaderInitInfoBaseHeaderKHR");
+        if (initFunc) LOGD("Found init via dlsym mangled");
     } else {
-        LOGD("Found xrInitializeLoaderKHR via xrGetInstanceProcAddr");
+        LOGD("Found init via xrGetInstanceProcAddr");
     }
 
-    if (initLoaderFunc != NULL) {
-        // Set up XrLoaderInitInfoAndroidKHR struct properly
-        XrLoaderInitInfoAndroidKHR loaderInfo;
-        loaderInfo.base.type = 1000295000;  // XR_TYPE_LOADER_INIT_INFO_ANDROID_KHR
-        loaderInfo.base.next = NULL;
-        loaderInfo.applicationVM = jvm;
-        loaderInfo.applicationActivity = activity;
+    if (initFunc) {
+        XrLoaderInitInfoAndroidKHR info;
+        info.base.type = 1000295000;  // XR_TYPE_LOADER_INIT_INFO_ANDROID_KHR
+        info.base.next = NULL;
+        info.applicationVM = jvm;
+        info.applicationActivity = activity;
 
-        LOGD("Calling xrInitializeLoaderKHR(type=%d, jvm=%p, activity=%p)",
-             loaderInfo.base.type, jvm, activity);
-
-        // Call xrInitializeLoaderKHR - use proper function pointer type
-        typedef XrResult (*xrInitLoaderKHR_fn)(const XrLoaderInitInfoBaseHeaderKHR*);
-        XrResult initRes = ((xrInitLoaderKHR_fn)initLoaderFunc)(&loaderInfo.base);
-        LOGD("xrInitializeLoaderKHR returned: %d", initRes);
-
-        if (initRes != 0) {
-            LOGD("xrInitializeLoaderKHR failed, but continuing...");
-        }
+        typedef XrResult (*FnTy)(const XrLoaderInitInfoBaseHeaderKHR*);
+        XrResult r = ((FnTy)initFunc)(&info.base);
+        LOGD("xrInitializeLoaderKHR result: %d", r);
     } else {
-        LOGE("xrInitializeLoaderKHR not found by any method");
+        LOGE("xrInitializeLoaderKHR could not be resolved");
     }
 }
 
 // ============================================================
-// JNI functions for net.kdt.pojavlaunch.MCXRLoader
+// JNI_OnLoad - minimal like original (~56 bytes equivalent logic)
 // ============================================================
-
-// JNI_OnLoad: Called when library is loaded via System.loadLibrary
-JNIEXPORT jint JNICALL
-JNI_OnLoad(JavaVM* vm, void* reserved)
-{
+JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM* vm, void* reserved) {
     (void)reserved;
-    LOGD("JNI_OnLoad called");
+    s_jvm = vm;
 
-    // Load all OpenXR functions first
-    if (!load_openxr_functions()) {
-        LOGE("Failed to load OpenXR functions");
-        // Continue anyway - the app may work without VR
-    }
+    // Touch ref arrays to ensure symbols aren't stripped
+    _touch_xr_refs();
+    _touch_vk_refs();
 
-    g_jvm = vm;
-
-    // Store JavaVM in the pojav_environ struct
-    g_pojav_environ.dalvikJavaVMPtr = vm;
-    g_pojav_environ.runtimeJavaVMPtr = vm;
-
-    // Store JavaVM in the android create info
-    g_android_create_info.applicationVM = vm;
-
+    LOGD("JNI_OnLoad: JavaVM=%p", (void*)vm);
     return JNI_VERSION_1_4;
 }
 
-// Launch thread function
-struct launch_thread_args {
+// ============================================================
+// Launch thread - call runCraft() in a detached thread via AttachCurrentThread
+// ============================================================
+typedef struct {
     JavaVM* jvm;
-    jobject activity_ref;
-    jmethodID method_id;
-};
+    jobject activity;
+    jmethodID runCraft;
+} launch_args;
 
-static void* launch_thread_func(void* arg) {
-    struct launch_thread_args* args = (struct launch_thread_args*)arg;
-    JavaVM* jvm = args->jvm;
+static void* launch_thread(void* arg) {
+    launch_args* a = (launch_args*)arg;
     JNIEnv* env = NULL;
-
-    if (jvm == NULL) {
-        LOGD("launch_thread_func: jvm is NULL, aborting");
-        free(args);
-        return NULL;
+    if ((*a->jvm)->AttachCurrentThread(a->jvm, &env, NULL) == JNI_OK && env) {
+        LOGD("launch_thread: calling runCraft");
+        (*env)->CallVoidMethod(env, a->activity, a->runCraft);
+        (*env)->DeleteGlobalRef(env, a->activity);
+        (*a->jvm)->DetachCurrentThread(a->jvm);
+    } else {
+        LOGE("launch_thread: AttachCurrentThread failed");
     }
-
-    // Attach this thread to the JVM to get a valid JNIEnv
-    jint attach_result = (*jvm)->AttachCurrentThread(jvm, &env, NULL);
-    if (attach_result != JNI_OK || env == NULL) {
-        LOGE("launch_thread_func: AttachCurrentThread failed: %d", attach_result);
-        free(args);
-        return NULL;
-    }
-
-    LOGD("launch_thread_func: calling activity.runCraft()");
-    // Call activity.runCraft()
-    (*env)->CallVoidMethod(env, args->activity_ref, args->method_id);
-
-    // Clean up global references
-    (*env)->DeleteGlobalRef(env, args->activity_ref);
-
-    // Detach from JVM
-    (*jvm)->DetachCurrentThread(jvm);
-    free(args);
-    LOGD("launch_thread_func: completed");
+    free(a);
     return NULL;
 }
 
-// JNI function: net.kdt.pojavlaunch.MCXRLoader.launch(android.app.Activity)
-JNIEXPORT void JNICALL
-Java_net_kdt_pojavlaunch_MCXRLoader_launch(
-    JNIEnv* env, jclass clazz, jobject activity)
+// ============================================================
+// JNI: MCXRLoader.launch(Activity)
+// ============================================================
+JNIEXPORT void JNICALL Java_net_kdt_pojavlaunch_MCXRLoader_launch(
+    JNIEnv* env, jclass cls, jobject activity)
 {
-    (void)clazz;
+    (void)cls;
     LOGD("launch called");
 
-    // Create a global reference to the activity
-    jobject activityRef = (*env)->NewGlobalRef(env, activity);
+    jclass actCls = (*env)->GetObjectClass(env, activity);
+    jmethodID runCraft = (*env)->GetMethodID(env, actCls, "runCraft", "()V");
+    if (!runCraft) { LOGE("launch: runCraft not found"); return; }
 
-    // Get the activity class
-    jclass activityClass = (*env)->GetObjectClass(env, activityRef);
+    launch_args* a = (launch_args*)malloc(sizeof(*a));
+    if (!a) return;
+    a->jvm = s_jvm;
+    a->activity = (*env)->NewGlobalRef(env, activity);
+    a->runCraft = runCraft;
 
-    // Find the "runCraft" method with signature "()V"
-    jmethodID runCraftMethod = (*env)->GetMethodID(env, activityClass, "runCraft", "()V");
-
-    if (runCraftMethod == NULL) {
-        LOGE("launch: runCraft method not found");
-        (*env)->DeleteGlobalRef(env, activityRef);
-        return;
+    pthread_t t;
+    if (pthread_create(&t, NULL, launch_thread, a) == 0) {
+        pthread_detach(t);
+        LOGD("launch: thread started");
+    } else {
+        LOGE("launch: pthread_create failed");
+        (*env)->DeleteGlobalRef(env, a->activity);
+        free(a);
     }
-
-    // Create thread args
-    struct launch_thread_args* args = malloc(sizeof(struct launch_thread_args));
-    if (args == NULL) {
-        LOGE("launch: malloc failed");
-        (*env)->DeleteGlobalRef(env, activityRef);
-        return;
-    }
-    args->jvm = g_jvm;
-    args->activity_ref = activityRef;
-    args->method_id = runCraftMethod;
-
-    // Create a new thread to call activity.runCraft()
-    pthread_t thread;
-    int ret = pthread_create(&thread, NULL, launch_thread_func, args);
-    if (ret != 0) {
-        LOGE("launch: pthread_create failed: %d", ret);
-        (*env)->DeleteGlobalRef(env, activityRef);
-        free(args);
-        return;
-    }
-    pthread_detach(thread);
-    LOGD("launch: thread created successfully");
 }
 
-// JNI function: net.kdt.pojavlaunch.MCXRLoader.setEGLGlobal(long, long, long)
-JNIEXPORT void JNICALL
-Java_net_kdt_pojavlaunch_MCXRLoader_setEGLGlobal(
-    JNIEnv* env, jclass clazz, jlong display, jlong config, jlong context)
+// ============================================================
+// JNI: MCXRLoader.setEGLGlobal(display, config, context)
+// Update exported GLES binding struct so OpenComposite reads it during session create
+// ============================================================
+JNIEXPORT void JNICALL Java_net_kdt_pojavlaunch_MCXRLoader_setEGLGlobal(
+    JNIEnv* env, jclass cls, jlong display, jlong config, jlong context)
 {
-    (void)clazz;
-    (void)env;
-    LOGD("setEGLGlobal called: display=%p, config=%p, context=%p",
+    (void)env; (void)cls;
+    LOGD("setEGLGlobal: d=%p c=%p ctx=%p",
          (void*)(intptr_t)display, (void*)(intptr_t)config, (void*)(intptr_t)context);
 
-    g_egl_display = (EGLDisplay)(intptr_t)display;
-    g_egl_config = (EGLConfig)(intptr_t)config;
-    g_egl_context = (EGLContext)(intptr_t)context;
-
-    // Set up the OpenComposite_Android_GLES_Binding_Info
-    g_android_gles_binding.type = (void*)(intptr_t)1000296001; // XR_TYPE_GRAPHICS_BINDING_OPENGL_ES_ANDROID_KHR
-    g_android_gles_binding.next = NULL;
-    g_android_gles_binding.display = g_egl_display;
-    g_android_gles_binding.config = g_egl_config;
-    g_android_gles_binding.context = g_egl_context;
-
-    // Point the OpenComposite pointers to our instances
-    g_pojav_environ.OpenComposite_Android_GLES_Binding_Info = &g_android_gles_binding;
-    g_pojav_environ.OpenComposite_Android_Create_Info = &g_android_create_info;
-
-    // Also set the extern variables for the old API
-    OpenComposite_Android_GLES_Binding_Info = &g_android_gles_binding;
-    OpenComposite_Android_Create_Info = &g_android_create_info;
+    s_android_gles_binding.display = (void*)(intptr_t)display;
+    s_android_gles_binding.config  = (void*)(intptr_t)config;
+    s_android_gles_binding.context = (void*)(intptr_t)context;
 }
 
-// Also provide the mangled version with parameter signature suffix for compatibility
-JNIEXPORT void JNICALL
-Java_net_kdt_pojavlaunch_MCXRLoader_setEGLGlobal__JJJ(
-    JNIEnv* env, jclass clazz, jlong display, jlong config, jlong context)
+// Compatibility version with parameter signature suffix
+JNIEXPORT void JNICALL Java_net_kdt_pojavlaunch_MCXRLoader_setEGLGlobal__JJJ(
+    JNIEnv* env, jclass cls, jlong display, jlong config, jlong context)
 {
-    Java_net_kdt_pojavlaunch_MCXRLoader_setEGLGlobal(env, clazz, display, config, context);
+    Java_net_kdt_pojavlaunch_MCXRLoader_setEGLGlobal(env, cls, display, config, context);
 }
 
-// JNI function: net.kdt.pojavlaunch.MCXRLoader.setAndroidInitInfo(android.app.Activity)
-JNIEXPORT void JNICALL
-Java_net_kdt_pojavlaunch_MCXRLoader_setAndroidInitInfo(
-    JNIEnv* env, jclass clazz, jobject activity)
+// ============================================================
+// JNI: MCXRLoader.setAndroidInitInfo(Activity)
+// Update exported Create_Info and call xrInitializeLoaderKHR
+// ============================================================
+JNIEXPORT void JNICALL Java_net_kdt_pojavlaunch_MCXRLoader_setAndroidInitInfo(
+    JNIEnv* env, jclass cls, jobject activity)
 {
-    (void)clazz;
+    (void)cls;
     LOGD("setAndroidInitInfo called");
 
-    // Get JavaVM pointer from env
-    JavaVM* jvm_local = NULL;
-    (*env)->GetJavaVM(env, &jvm_local);
-    if (jvm_local != NULL) {
-        g_jvm = jvm_local;
-        g_pojav_environ.dalvikJavaVMPtr = jvm_local;
-        g_pojav_environ.runtimeJavaVMPtr = jvm_local;
-        LOGD("setAndroidInitInfo: JavaVM=%p", jvm_local);
+    JavaVM* vm = NULL;
+    (*env)->GetJavaVM(env, &vm);
+    if (vm) {
+        s_jvm = vm;
+        LOGD("setAndroidInitInfo: JavaVM=%p", (void*)vm);
     }
 
-    // Store the activity reference
-    jobject activityRef = (*env)->NewGlobalRef(env, activity);
-    g_pojav_environ.activity = activityRef;
+    jobject actRef = (*env)->NewGlobalRef(env, activity);
 
-    // Set up the Android create info for xrCreateInstance
-    g_android_create_info.type = (void*)(intptr_t)1000296000; // XR_TYPE_INSTANCE_CREATE_INFO_ANDROID_KHR
-    g_android_create_info.next = NULL;
-    g_android_create_info.createFlags = NULL;
-    g_android_create_info.applicationVM = g_jvm;
-    g_android_create_info.applicationActivity = activityRef;
+    // Update exported create info backing struct
+    s_android_create_info.type              = 1000296000;  // XR_TYPE_INSTANCE_CREATE_INFO_ANDROID_KHR
+    s_android_create_info.next              = NULL;
+    s_android_create_info.createFlags       = 0;
+    s_android_create_info.applicationVM     = (void*)s_jvm;
+    s_android_create_info.applicationActivity = (void*)actRef;
 
-    // Initialize the OpenXR loader
-    initialize_openxr_loader((void*)g_jvm, (void*)activityRef);
-}
+    LOGD("Create_Info{type=%d vm=%p act=%p}",
+         s_android_create_info.type,
+         s_android_create_info.applicationVM,
+         s_android_create_info.applicationActivity);
 
-// ============================================================
-// Vulkan extension wrapper
-// ============================================================
-typedef struct VkPhysicalDeviceProperties2 {
-    void* sType;
-    void* pNext;
-    void* properties;
-} VkPhysicalDeviceProperties2;
-
-void vkGetPhysicalDeviceProperties2(void* physicalDevice, VkPhysicalDeviceProperties2* pProperties) {
-    static void (*real_fn)(void*, VkPhysicalDeviceProperties2*) = NULL;
-    if (!real_fn) {
-        void* handle = dlopen("libvulkan.so", RTLD_NOW | RTLD_GLOBAL);
-        if (handle) {
-            real_fn = (void (*)(void*, VkPhysicalDeviceProperties2*))dlsym(handle, "vkGetPhysicalDeviceProperties2");
-        }
-        if (!real_fn) {
-            // Fallback - just return without doing anything
-            return;
-        }
-    }
-    real_fn(physicalDevice, pProperties);
+    // Now try to initialize the OpenXR loader
+    s_call_xrInitializeLoaderKHR((void*)s_jvm, (void*)actRef);
 }
