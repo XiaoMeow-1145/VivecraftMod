@@ -1,0 +1,68 @@
+ 
+09-02 01:07:23.265  9299  9299 D OpenXR-Wrapper: JNI_OnLoad called
+09-02 01:07:23.265  9299  9299 D OpenXR-Wrapper: Loading libopenxr_loader.so...
+09-02 01:07:23.266  9299  9299 D OpenXR-Wrapper: libopenxr_loader.so loaded at 0x5aba3190966d04c9
+09-02 01:07:23.266  9299  9299 D OpenXR-Wrapper:   Resolved xrGetInstanceProcAddr -> 0x78e8a33f30
+09-02 01:07:23.266  9299  9299 D OpenXR-Wrapper:   Resolved xrCreateInstance -> 0x78e8a33f28
+09-02 01:07:23.266  9299  9299 D OpenXR-Wrapper:   Resolved xrDestroyInstance -> 0x78e8a33f2c
+09-02 01:07:23.266  9299  9299 D OpenXR-Wrapper:   Resolved xrEnumerateApiLayerProperties -> 0x78e8a33f20
+09-02 01:07:23.266  9299  9299 D OpenXR-Wrapper:   Resolved xrEnumerateInstanceExtensionProperties -> 0x78e8a33f24
+09-02 01:07:23.266  9299  9299 D OpenXR-Wrapper:   Resolved xrGetSystem -> 0x78e8a43028
+09-02 01:07:23.266  9299  9299 D OpenXR-Wrapper:   Resolved xrGetSystemProperties -> 0x78e8a430ac
+09-02 01:07:23.266  9299  9299 D OpenXR-Wrapper:   Resolved xrCreateSession -> 0x78e8a431dc
+09-02 01:07:23.266  9299  9299 D OpenXR-Wrapper:   Resolved xrDestroySession -> 0x78e8a43260
+09-02 01:07:23.266  9299  9299 D OpenXR-Wrapper:   Resolved xrBeginSession -> 0x78e8a43b5c
+09-02 01:07:23.266  9299  9299 D OpenXR-Wrapper:   Resolved xrEndSession -> 0x78e8a43bd8
+09-02 01:07:23.266  9299  9299 D OpenXR-Wrapper:   Resolved xrRequestExitSession -> 0x78e8a43c44
+09-02 01:07:23.266  9299  9299 D OpenXR-Wrapper:   Resolved xrWaitFrame -> 0x78e8a43cb0
+09-02 01:07:23.266  9299  9299 D OpenXR-Wrapper:   Resolved xrBeginFrame -> 0x78e8a43d34
+09-02 01:07:23.266  9299  9299 D OpenXR-Wrapper:   Resolved xrEndFrame -> 0x78e8a43db0
+09-02 01:07:23.266  9299  9299 D OpenXR-Wrapper:   Resolved xrCreateReferenceSpace -> 0x78e8a43360
+09-02 01:07:23.266  9299  9299 D OpenXR-Wrapper:   Resolved xrDestroySpace -> 0x78e8a43580
+09-02 01:07:23.266  9299  9299 D OpenXR-Wrapper:   Resolved xrLocateSpace -> 0x78e8a434ec
+09-02 01:07:23.266  9299  9299 D OpenXR-Wrapper:   Resolved xrCreateActionSet -> 0x78e8a43ff8
+09-02 01:07:23.266  9299  9299 D OpenXR-Wrapper:   Resolved xrDestroyActionSet -> 0x78e8a4407c
+09-02 01:07:23.266  9299  9299 D OpenXR-Wrapper:   Resolved xrCreateAction -> 0x78e8a440e8
+09-02 01:07:23.266  9299  9299 D OpenXR-Wrapper:   Resolved xrDestroyAction -> 0x78e8a4416c
+09-02 01:07:23.266  9299  9299 D OpenXR-Wrapper:   Resolved xrSuggestInteractionProfileBindings -> 0x78e8a441d8
+09-02 01:07:23.266  9299  9299 D OpenXR-Wrapper:   Resolved xrAttachSessionActionSets -> 0x78e8a44254
+09-02 01:07:23.266  9299  9299 D OpenXR-Wrapper:   Resolved xrSyncActions -> 0x78e8a44564
+09-02 01:07:23.266  9299  9299 D OpenXR-Wrapper:   Resolved xrEnumerateBoundSourcesForAction -> 0x78e8a445e0
+09-02 01:07:23.266  9299  9299 D OpenXR-Wrapper:   Resolved xrGetCurrentInteractionProfile -> 0x78e8a442d0
+09-02 01:07:23.266  9299  9299 D OpenXR-Wrapper:   Resolved xrGetActionStateBoolean -> 0x78e8a44354
+09-02 01:07:23.266  9299  9299 D OpenXR-Wrapper:   Resolved xrGetActionStateFloat -> 0x78e8a443d8
+09-02 01:07:23.266  9299  9299 D OpenXR-Wrapper:   Resolved xrGetActionStateVector2f -> 0x78e8a4445c
+09-02 01:07:23.266  9299  9299 D OpenXR-Wrapper:   Resolved xrStringToPath -> 0x78e8a43ed8
+09-02 01:07:23.266  9299  9299 D OpenXR-Wrapper:   Resolved xrPathToString -> 0x78e8a43f5c
+09-02 01:07:23.266  9299  9299 D OpenXR-Wrapper:   Resolved xrPollEvent -> 0x78e8a42ea4
+09-02 01:07:23.266  9299  9299 D OpenXR-Wrapper:   Resolved xrResultToString -> 0x78e8a42f20
+09-02 01:07:23.266  9299  9299 D OpenXR-Wrapper:   Resolved xrCreateSwapchain -> 0x78e8a4385c
+09-02 01:07:23.266  9299  9299 D OpenXR-Wrapper:   Resolved xrDestroySwapchain -> 0x78e8a438e0
+09-02 01:07:23.266  9299  9299 D OpenXR-Wrapper:   Resolved xrEnumerateSwapchainFormats -> 0x78e8a437c8
+09-02 01:07:23.266  9299  9299 D OpenXR-Wrapper:   Resolved xrEnumerateSwapchainImages -> 0x78e8a4394c
+09-02 01:07:23.266  9299  9299 D OpenXR-Wrapper:   Resolved xrAcquireSwapchainImage -> 0x78e8a439e0
+09-02 01:07:23.266  9299  9299 D OpenXR-Wrapper:   Resolved xrWaitSwapchainImage -> 0x78e8a43a64
+09-02 01:07:23.266  9299  9299 D OpenXR-Wrapper:   Resolved xrReleaseSwapchainImage -> 0x78e8a43ae0
+09-02 01:07:23.266  9299  9299 D OpenXR-Wrapper:   Resolved xrEnumerateViewConfigurationViews -> 0x78e8a4371c
+09-02 01:07:23.266  9299  9299 D OpenXR-Wrapper:   Resolved xrLocateViews -> 0x78e8a43e2c
+09-02 01:07:23.266  9299  9299 D OpenXR-Wrapper:   Resolved xrApplyHapticFeedback -> 0x78e8a44718
+09-02 01:07:23.266  9299  9299 D OpenXR-Wrapper:   Resolved xrGetReferenceSpaceBoundsRect -> 0x78e8a433e4
+09-02 01:07:23.266  9299  9299 D OpenXR-Wrapper:   Resolved xrCreateActionSpace -> 0x78e8a43468
+09-02 01:07:23.266  9299  9299 D OpenXR-Wrapper:   Resolved xrEnumerateReferenceSpaces -> 0x78e8a432cc
+09-02 01:07:23.266  9299  9299 D OpenXR-Wrapper:   Resolved xrGetViewConfigurationProperties -> 0x78e8a43688
+09-02 01:07:23.266  9299  9299 D OpenXR-Wrapper:   Resolved xrGetInputSourceLocalizedName -> 0x78e8a4467c
+09-02 01:07:23.266  9299  9299 D OpenXR-Wrapper:   Resolved xrGetActionStatePose -> 0x78e8a444e0
+09-02 01:07:23.266  9299  9299 D OpenXR-Wrapper:   Resolved xrStopHapticFeedback -> 0x78e8a4479c
+09-02 01:07:23.266  9299  9299 D OpenXR-Wrapper:   Resolved xrEnumerateEnvironmentBlendModes -> 0x78e8a43130
+09-02 01:07:23.266  9299  9299 D OpenXR-Wrapper:   Resolved xrStructureTypeToString -> 0x78e8a42fa4
+09-02 01:07:23.266  9299  9299 D OpenXR-Wrapper: All xr* functions resolved successfully
+09-02 01:07:23.266  9299  9299 D OpenXR-Wrapper: setEGLGlobal called: display=0x78875d5ad0, config=0x78875d5ad8, context=0x78875d5bd8
+09-02 01:07:23.266  9299  9299 D OpenXR-Wrapper: setAndroidInitInfo called
+09-02 01:07:23.266  9299  9299 D OpenXR-Wrapper: setAndroidInitInfo: JavaVM=0xb4000079aa35c540
+09-02 01:07:23.266  9299  9299 D OpenXR-Wrapper: Initializing OpenXR loader via xrGetInstanceProcAddr...
+09-02 01:07:23.266  9299  9299 D OpenXR-Wrapper: Found xrInitializeLoaderKHR via xrGetInstanceProcAddr
+09-02 01:07:23.266  9299  9299 D OpenXR-Wrapper: xrInitializeLoaderKHR returned: -1
+09-02 01:07:23.266  9299  9299 D OpenXR-Wrapper: launch called
+09-02 01:07:23.266  9299  9299 D OpenXR-Wrapper: launch: thread created successfully
+09-02 01:07:23.268  9299  9422 D OpenXR-Wrapper: launch_thread_func: calling activity.runCraft()
+

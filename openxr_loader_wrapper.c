@@ -49,6 +49,20 @@ typedef struct XrGraphicsBindingOpenGLESAndroidKHR {
     void* context;
 } XrGraphicsBindingOpenGLESAndroidKHR;
 
+// XrLoaderInitInfoBaseHeaderKHR - base header for loader init info
+typedef struct XrLoaderInitInfoBaseHeaderKHR {
+    int32_t type;       // XrStructureType (32-bit enum)
+    const void* next;   // next in chain (8 bytes, aligned to 8)
+    // Note: on ARM64, there's 4 bytes of padding between type and next
+} XrLoaderInitInfoBaseHeaderKHR;
+
+// XrLoaderInitInfoAndroidKHR - Android-specific loader init info
+typedef struct XrLoaderInitInfoAndroidKHR {
+    XrLoaderInitInfoBaseHeaderKHR base;  // 16 bytes (4 + 4 padding + 8)
+    void* applicationVM;                 // 8 bytes
+    void* applicationActivity;           // 8 bytes
+} XrLoaderInitInfoAndroidKHR;
+
 // ============================================================
 // OpenXR loader handle and function pointer table
 // ============================================================
@@ -332,37 +346,50 @@ static int g_openxr_loader_initialized = 0;
 // xrInitializeLoaderKHR - special handling
 // The function has C++ name mangling in the loader, so we find
 // it via xrGetInstanceProcAddr (which is an unmangled C symbol)
+// We also try the mangled C++ name directly via dlsym as fallback
 // ============================================================
 static void initialize_openxr_loader(void* jvm, void* activity) {
     if (g_openxr_loader_initialized) return;
     g_openxr_loader_initialized = 1;
 
-    LOGD("Initializing OpenXR loader via xrGetInstanceProcAddr...");
+    LOGD("Initializing OpenXR loader...");
 
-    // Use xrGetInstanceProcAddr with null instance to find xrInitializeLoaderKHR
+    // Try to find xrInitializeLoaderKHR via xrGetInstanceProcAddr first
     void* initLoaderFunc = NULL;
     XrResult res = xrGetInstanceProcAddr((XrInstance)0, "xrInitializeLoaderKHR", &initLoaderFunc);
 
-    if (res == 0 && initLoaderFunc != NULL) {
-        LOGD("Found xrInitializeLoaderKHR via xrGetInstanceProcAddr");
-
-        // Set up XrLoaderInitInfoAndroidKHR struct
-        // Layout:
-        //   offset 0: type (uint64_t) = XR_TYPE_LOADER_INIT_INFO_ANDROID_KHR (1000295000)
-        //   offset 8: next (void*) = NULL
-        //   offset 16: applicationVM (void*)
-        //   offset 24: applicationActivity (void*)
-        void* loaderInfo[4];
-        loaderInfo[0] = (void*)(intptr_t)1000295000; // XR_TYPE_LOADER_INIT_INFO_ANDROID_KHR
-        loaderInfo[1] = NULL;
-        loaderInfo[2] = jvm;
-        loaderInfo[3] = activity;
-
-        // Call xrInitializeLoaderKHR
-        XrResult initRes = ((XrResult (*)(void*))initLoaderFunc)(loaderInfo);
-        LOGD("xrInitializeLoaderKHR returned: %d", initRes);
+    // If not found, try the mangled C++ name directly
+    if (res != 0 || initLoaderFunc == NULL) {
+        LOGD("Trying mangled name _Z21xrInitializeLoaderKHRPK29XrLoaderInitInfoBaseHeaderKHR");
+        initLoaderFunc = dlsym(g_openxr_handle, "_Z21xrInitializeLoaderKHRPK29XrLoaderInitInfoBaseHeaderKHR");
+        if (initLoaderFunc) {
+            LOGD("Found xrInitializeLoaderKHR via mangled dlsym");
+        }
     } else {
-        LOGE("xrInitializeLoaderKHR not found via xrGetInstanceProcAddr (res=%d, func=%p)", res, initLoaderFunc);
+        LOGD("Found xrInitializeLoaderKHR via xrGetInstanceProcAddr");
+    }
+
+    if (initLoaderFunc != NULL) {
+        // Set up XrLoaderInitInfoAndroidKHR struct properly
+        XrLoaderInitInfoAndroidKHR loaderInfo;
+        loaderInfo.base.type = 1000295000;  // XR_TYPE_LOADER_INIT_INFO_ANDROID_KHR
+        loaderInfo.base.next = NULL;
+        loaderInfo.applicationVM = jvm;
+        loaderInfo.applicationActivity = activity;
+
+        LOGD("Calling xrInitializeLoaderKHR(type=%d, jvm=%p, activity=%p)",
+             loaderInfo.base.type, jvm, activity);
+
+        // Call xrInitializeLoaderKHR - use proper function pointer type
+        typedef XrResult (*xrInitLoaderKHR_fn)(const XrLoaderInitInfoBaseHeaderKHR*);
+        XrResult initRes = ((xrInitLoaderKHR_fn)initLoaderFunc)(&loaderInfo.base);
+        LOGD("xrInitializeLoaderKHR returned: %d", initRes);
+
+        if (initRes != 0) {
+            LOGD("xrInitializeLoaderKHR failed, but continuing...");
+        }
+    } else {
+        LOGE("xrInitializeLoaderKHR not found by any method");
     }
 }
 
