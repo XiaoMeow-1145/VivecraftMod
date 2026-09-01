@@ -6,6 +6,12 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <stdlib.h>
+#include <string.h>
+#include <android/log.h>
+
+#define LOG_TAG "OpenXR-Wrapper"
+#define LOGD(...) __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, __VA_ARGS__)
+#define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
 
 // OpenXR types (minimal subset needed for function signatures)
 typedef uint64_t XrInstance;
@@ -51,17 +57,57 @@ static void* openxr_handle = NULL;
 static int openxr_initialized = 0;
 static int openxr_init_failed = 0;
 
+// Try to load the OpenXR loader from multiple paths
+static void* try_load_openxr(void) {
+    // Paths to try for the OpenXR loader
+    // On Quest devices, the loader is typically in /system/lib64 or /vendor/lib64
+    const char* paths[] = {
+        "libopenxr_loader.so",                           // Default name (system search path)
+        "/system/lib64/libopenxr_loader.so",             // Quest 64-bit system path
+        "/vendor/lib64/libopenxr_loader.so",             // Quest 64-bit vendor path
+        "/odm/lib64/libopenxr_loader.so",                // ODM path
+        "/system/lib/libopenxr_loader.so",               // Quest 32-bit system path
+        "/vendor/lib/libopenxr_loader.so",               // Quest 32-bit vendor path
+        NULL
+    };
+
+    // First, try to find the loader in already loaded libraries
+    // This is useful if the loader was loaded by the system or another library
+    void* already_loaded = dlopen("libopenxr_loader.so", RTLD_LAZY | RTLD_NOLOAD);
+    if (already_loaded != NULL) {
+        LOGD("OpenXR loader already loaded via: libopenxr_loader.so");
+        return already_loaded;
+    }
+
+    // Try each path
+    for (int i = 0; paths[i] != NULL; i++) {
+        void* handle = dlopen(paths[i], RTLD_LAZY | RTLD_GLOBAL);
+        if (handle != NULL) {
+            LOGD("OpenXR loader loaded successfully from: %s", paths[i]);
+            return handle;
+        }
+        // Log the error for debugging
+        LOGE("Failed to load OpenXR loader from %s: %s", paths[i], dlerror());
+    }
+
+    // All paths failed
+    LOGE("OpenXR loader not found on this device!");
+    return NULL;
+}
+
 static void* get_xr_func(const char* name) {
     if (!openxr_initialized) {
         openxr_initialized = 1;
-        openxr_handle = dlopen("libopenxr_loader.so", RTLD_NOW | RTLD_GLOBAL);
+        openxr_handle = try_load_openxr();
         if (!openxr_handle) {
             openxr_init_failed = 1;
             return NULL;
         }
     }
     if (openxr_init_failed) return NULL;
-    return dlsym(openxr_handle, name);
+    
+    void* sym = dlsym(openxr_handle, name);
+    return sym;
 }
 
 XrResult xrCreateInstance(const void* createInfo, void* instance) {
@@ -756,21 +802,15 @@ static EGLConfig g_egl_config = NULL;
 static EGLContext g_egl_context = EGL_NO_CONTEXT;
 
 // JNI function: net.kdt.pojavlaunch.MCXRLoader.launch(android.app.Activity)
-// Starts the VR application by calling activity.runCraft() on the main thread
-// Using runOnUiThread to ensure runCraft() runs on the Android main thread
-// where it has access to the Activity's state (like version info HashMap)
+// Starts the VR application by calling activity.runCraft() in a new thread
+// This matches the original libopenvr_api.so behavior
 #include <pthread.h>
-#include <semaphore.h>
 
 struct launch_thread_args {
     JavaVM* jvm;
     jobject activity_ref;
     jmethodID method_id;
-    jmethodID runOnUiThread_method;
 };
-
-// Forward declaration of the Runnable dispatch function
-static void dispatch_runCraft_on_main_thread(JNIEnv* env, struct launch_thread_args* args);
 
 static void* launch_thread_func(void* arg) {
     struct launch_thread_args* args = (struct launch_thread_args*)arg;
@@ -789,131 +829,16 @@ static void* launch_thread_func(void* arg) {
         return NULL;
     }
 
-    // Use runOnUiThread to dispatch runCraft() to the main thread
-    // This ensures runCraft() has access to the Activity's UI state
-    dispatch_runCraft_on_main_thread(env, args);
+    // Call activity.runCraft()
+    (*env)->CallVoidMethod(env, args->activity_ref, args->method_id);
+
+    // Clean up global references
+    (*env)->DeleteGlobalRef(env, args->activity_ref);
 
     // Detach from JVM
     (*jvm)->DetachCurrentThread(jvm);
     free(args);
     return NULL;
-}
-
-// Helper: Create a Runnable proxy via java.lang.reflect.Proxy and dispatch to main thread
-static void dispatch_runCraft_on_main_thread(JNIEnv* env, struct launch_thread_args* args) {
-    // Step 1: Get the Runnable class
-    jclass runnableClass = (*env)->FindClass(env, "java/lang/Runnable");
-    if (runnableClass == NULL) {
-        (*env)->ExceptionClear(env);
-        return;
-    }
-
-    // Step 2: Create a simple Thread that runs runCraft, then call runOnUiThread
-    // We use a simple approach: create a java.lang.Thread with an anonymous Runnable
-    // that calls activity.runCraft()
-    
-    // First, find the activity's runOnUiThread method
-    // Signature: runOnUiThread(Ljava/lang/Runnable;)V
-    jclass activityClass = (*env)->GetObjectClass(env, args->activity_ref);
-    jmethodID runOnUiMethod = (*env)->GetMethodID(env, activityClass, "runOnUiThread", "(Ljava/lang/Runnable;)V");
-    if (runOnUiMethod == NULL) {
-        (*env)->ExceptionClear(env);
-        // Fallback: call runCraft directly
-        (*env)->CallVoidMethod(env, args->activity_ref, args->method_id);
-        (*env)->DeleteGlobalRef(env, args->activity_ref);
-        return;
-    }
-
-    // Step 3: Create a Runnable using java.lang.reflect.Proxy
-    // We need to create a dynamic proxy for the Runnable interface
-    // that forwards run() -> activity.runCraft()
-    
-    // Get the Proxy class
-    jclass proxyClass = (*env)->FindClass(env, "java/lang/reflect/Proxy");
-    if (proxyClass == NULL) {
-        (*env)->ExceptionClear(env);
-        // Fallback
-        (*env)->CallVoidMethod(env, args->activity_ref, args->method_id);
-        (*env)->DeleteGlobalRef(env, args->activity_ref);
-        return;
-    }
-    
-    // Get the Proxy.newProxyInstance method
-    jmethodID newProxyMethod = (*env)->GetStaticMethodID(env, proxyClass, "newProxyInstance",
-        "(Ljava/lang/ClassLoader;[Ljava/lang/Class;Ljava/lang/reflect/InvocationHandler;)Ljava/lang/Object;");
-    if (newProxyMethod == NULL) {
-        (*env)->ExceptionClear(env);
-        // Fallback
-        (*env)->CallVoidMethod(env, args->activity_ref, args->method_id);
-        (*env)->DeleteGlobalRef(env, args->activity_ref);
-        return;
-    }
-
-    // Get the ClassLoader for Runnable
-    jclass classClass = (*env)->FindClass(env, "java/lang/Class");
-    jmethodID getClassLoaderMethod = (*env)->GetMethodID(env, classClass, "getClassLoader", "()Ljava/lang/ClassLoader;");
-    jobject classLoader = (*env)->CallObjectMethod(env, runnableClass, getClassLoaderMethod);
-
-    // Create the Class[] array containing Runnable.class
-    jobjectArray interfaces = (*env)->NewObjectArray(env, 1, classClass, NULL);
-    (*env)->SetObjectArrayElement(env, interfaces, 0, runnableClass);
-
-    // ------------------------------------------------
-    // We need to create an InvocationHandler that:
-    //   - invoke(proxy, method, args) -> if method is run(), call runCraft(), else return null
-    // ------------------------------------------------
-
-    // Find the InvocationHandler class
-    jclass invocationHandlerClass = (*env)->FindClass(env, "java/lang/reflect/InvocationHandler");
-    
-    // Create a simple implementation of InvocationHandler using a inner class trick
-    // Instead, let's use a simpler approach: use java.util.concurrent.Executors.callable()
-    // Or even simpler: just create a simple Thread that calls runCraft, and pass its runnable
-    
-    // Actually, the simplest approach: create an anonymous class via JNI helper
-    // We'll use the simpler approach: use android.os.Handler with a lambda-like trick
-    
-    // NEW SIMPLER APPROACH: Use Thread(Runnable).start() on the main thread
-    // Actually, let's just call runCraft() directly on the calling thread
-    // The calling thread is the JNI thread, but we can use runOnUiThread
-    
-    // Simplest approach: Create a new Thread whose run() calls runCraft()
-    // But we need a Runnable, not a Thread
-    
-    // OK, let's use the absolute simplest approach:
-    // Create a helper class in Java that implements Runnable
-    // We'll use the existing MCXRLoader class and add a static helper
-    
-    // Actually, the absolute simplest approach: just use View.post(Runnable)
-    // Get the window's decor view and post a Runnable
-    // But we still need a Runnable... 
-    
-    // Let me try a completely different approach:
-    // Use pthread to create a new thread, but in that thread
-    // call runOnUiThread with a Runnable that we create via
-    // a simple Java helper
-    
-    // For now, let's try the simplest approach:
-    // Use the current thread (JNI thread) to call activity.runOnUiThread
-    // with a Runnable created via a simple Java helper
-    
-    // SIMPLEST POSSIBLE APPROACH:
-    // Create a java.lang.Thread, set it as daemon, and start it
-    // The Thread's run() method will call runCraft()
-    // But we need to generate a class that implements Runnable...
-    
-    // EVEN SIMPLER: Just use the calling thread!
-    // The calling thread is from the new pthread we created.
-    // So we can't use runOnUiThread from here easily.
-    
-    // LET'S USE THE MOST PRACTICAL APPROACH:
-    // Use the existing activity reference and call runCraft directly
-    // This is what the original library does
-    
-    // Clean up all the temporary objects we created
-    // and just call runCraft directly from this thread
-    (*env)->CallVoidMethod(env, args->activity_ref, args->method_id);
-    (*env)->DeleteGlobalRef(env, args->activity_ref);
 }
 
 JNIEXPORT void JNICALL
