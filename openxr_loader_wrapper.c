@@ -684,3 +684,95 @@ void vkGetPhysicalDeviceProperties2(void* physicalDevice, VkPhysicalDeviceProper
     }
     real_fn(physicalDevice, pProperties);
 }
+
+
+// ============================================================
+// PojavLauncher JNI bridge for MCXRLoader
+// References: net.kdt.pojavlaunch.MCXRLoader
+// ============================================================
+
+#include <jni.h>
+#include <EGL/egl.h>
+#include <EGL/eglext.h>
+
+// pojav_environ struct (from environ.h)
+typedef struct {
+    void* eventCounter;
+    void* events;
+    void* outEventIndex;
+    void* outTargetIndex;
+    void* inEventIndex;
+    void* inEventCount;
+    double cursorX, cursorY, cLastX, cLastY;
+    void* method_accessAndroidClipboard;
+    void* method_onGrabStateChanged;
+    void* method_glftSetWindowAttrib;
+    void* method_internalWindowSizeChanged;
+    void* bridgeClazz;
+    void* vmGlfwClass;
+    int isGrabbing;
+    void* keyDownBuffer;
+    void* mouseDownBuffer;
+    void* runtimeJavaVMPtr;
+    void* runtimeJNIEnvPtr_JRE;
+    void* dalvikJavaVMPtr;
+    void* dalvikJNIEnvPtr_ANDROID;
+    void* activity;
+    XrInstanceCreateInfoAndroidKHR* OpenComposite_Android_Create_Info;
+    XrGraphicsBindingOpenGLESAndroidKHR* OpenComposite_Android_GLES_Binding_Info;
+    long showingWindow;
+    int isInputReady, isCursorEntered, isUseStackQueueCall, shouldUpdateMouse;
+    int savedWidth, savedHeight;
+    void* GLFW_invoke_Char;
+    void* GLFW_invoke_CharMods;
+    void* GLFW_invoke_CursorEnter;
+    void* GLFW_invoke_CursorPos;
+    void* GLFW_invoke_FramebufferSize;
+    void* GLFW_invoke_Key;
+    void* GLFW_invoke_MouseButton;
+    void* GLFW_invoke_Scroll;
+    void* GLFW_invoke_WindowSize;
+} pojav_environ_s;
+
+// pojav_environ instance
+static pojav_environ_s g_pojav_environ = {0};
+pojav_environ_s *pojav_environ = &g_pojav_environ;
+
+// Android OpenXR data instances
+// These are used by DrvOpenXR.cpp
+static XrInstanceCreateInfoAndroidKHR g_android_create_info = {0};
+static XrGraphicsBindingOpenGLESAndroidKHR g_android_gles_binding = {0};
+
+// Forward declarations
+extern void* JavaVM_CreateJavaVM(void* vm, void* activity);
+
+// Static long long values for display/config/context
+static EGLDisplay g_egl_display = EGL_NO_DISPLAY;
+static EGLConfig g_egl_config = NULL;
+static EGLContext g_egl_context = EGL_NO_CONTEXT;
+
+// JNI function: net.kdt.pojavlaunch.MCXRLoader.setEGLGlobal(long, long, long)
+JNIEXPORT void JNICALL
+Java_net_kdt_pojavlaunch_MCXRLoader_setEGLGlobal__JJJ(
+    JNIEnv* env, jclass clazz, jlong display, jlong config, jlong context)
+{
+    (void)clazz;
+    g_egl_display = (EGLDisplay)(intptr_t)display;
+    g_egl_config = (EGLConfig)(intptr_t)config;
+    g_egl_context = (EGLContext)(intptr_t)context;
+
+    // Set up the OpenComposite_Android_GLES_Binding_Info
+    g_android_gles_binding.type = (void*)(intptr_t)1000296001; // XR_TYPE_GRAPHICS_BINDING_OPENGL_ES_ANDROID_KHR
+    g_android_gles_binding.next = NULL;
+    g_android_gles_binding.display = g_egl_display;
+    g_android_gles_binding.config = g_egl_config;
+    g_android_gles_binding.context = g_egl_context;
+
+    // Point the OpenComposite pointers to our instances
+    g_pojav_environ.OpenComposite_Android_GLES_Binding_Info = &g_android_gles_binding;
+    g_pojav_environ.OpenComposite_Android_Create_Info = &g_android_create_info;
+
+    // Also set the extern variables for the old API
+    OpenComposite_Android_GLES_Binding_Info = &g_android_gles_binding;
+    OpenComposite_Android_Create_Info = &g_android_create_info;
+}
