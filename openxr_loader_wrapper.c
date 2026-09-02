@@ -52,7 +52,6 @@ typedef struct XrLoaderInitInfoAndroidKHR {
 typedef struct XrInstanceCreateInfoAndroidKHR {
     int32_t type;
     const void* next;
-    uint64_t createFlags;
     void* applicationVM;
     void* applicationActivity;
 } XrInstanceCreateInfoAndroidKHR;
@@ -286,7 +285,6 @@ static JavaVM* s_jvm = NULL;
 static XrInstanceCreateInfoAndroidKHR s_android_create_info = {
     1000296000,   // XR_TYPE_INSTANCE_CREATE_INFO_ANDROID_KHR
     NULL,         // next
-    0,            // createFlags
     NULL,         // applicationVM
     NULL,         // applicationActivity
 };
@@ -487,7 +485,6 @@ JNIEXPORT void JNICALL Java_net_kdt_pojavlaunch_MCXRLoader_setAndroidInitInfo(
     // Update exported create info backing struct
     s_android_create_info.type              = 1000296000;  // XR_TYPE_INSTANCE_CREATE_INFO_ANDROID_KHR
     s_android_create_info.next              = NULL;
-    s_android_create_info.createFlags       = 0;
     s_android_create_info.applicationVM     = (void*)s_jvm;
     s_android_create_info.applicationActivity = (void*)actRef;
 
