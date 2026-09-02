@@ -184,6 +184,8 @@ static xr_dispatch xr = {NULL};
 // ============================================================
 // Load OpenXR dispatch table from system's libopenxr_loader.so
 // ============================================================
+// Store the dlopen handle for fallback dlsym
+static void* g_openxr_handle = NULL;
 #define XR_LOAD_SYM(handle, name) do { \
     xr.name = (PFN_xr##name##_t)dlsym(handle, "xr" #name); \
     if (!xr.name) { \
@@ -214,6 +216,8 @@ static int s_load_xr_dispatch(void) {
         LOGE("Could not load any libopenxr_loader.so");
         return -1;
     }
+
+    g_openxr_handle = handle;
 
     // Load all OpenXR function pointers
     XR_LOAD_SYM(handle, GetInstanceProcAddr);
@@ -309,20 +313,41 @@ void* OpenComposite_Android_Load_Input_File = NULL;
 static void s_call_xrInitializeLoaderKHR(void* jvm, void* activity) {
     LOGD("Calling xrInitializeLoaderKHR...");
 
-    // Try to find xrInitializeLoaderKHR via the dispatch table
     PFN_xrVoidFunction initFunc = NULL;
-    XrResult res = xr.GetInstanceProcAddr((XrInstance)0, "xrInitializeLoaderKHR", &initFunc);
-    if (res != 0 || initFunc == NULL) {
-        // Try mangled C++ name via dlsym
+
+    // Strategy 1: Try dlsym from the loaded library handle directly (most reliable)
+    if (g_openxr_handle) {
+        initFunc = (PFN_xrVoidFunction)dlsym(g_openxr_handle, "xrInitializeLoaderKHR");
+        if (initFunc) {
+            LOGD("Found init via dlsym(libhandle)");
+        }
+    }
+
+    // Strategy 2: Try dlsym(RTLD_DEFAULT, "xrInitializeLoaderKHR") - plain C name
+    if (!initFunc) {
+        initFunc = (PFN_xrVoidFunction)dlsym(RTLD_DEFAULT, "xrInitializeLoaderKHR");
+        if (initFunc) {
+            LOGD("Found init via dlsym(RTLD_DEFAULT)");
+        }
+    }
+
+    // Strategy 3: Try mangled C++ name via dlsym
+    if (!initFunc) {
         initFunc = (PFN_xrVoidFunction)dlsym(RTLD_DEFAULT, "_Z21xrInitializeLoaderKHRPK29XrLoaderInitInfoBaseHeaderKHR");
         if (initFunc) {
             LOGD("Found init via dlsym mangled C++ name");
+        }
+    }
+
+    // Strategy 4: Try via xrGetInstanceProcAddr from the dispatch table
+    if (!initFunc) {
+        XrResult res = xr.GetInstanceProcAddr((XrInstance)0, "xrInitializeLoaderKHR", &initFunc);
+        if (res == 0 && initFunc) {
+            LOGD("Found init via xrGetInstanceProcAddr");
         } else {
-            LOGE("xrInitializeLoaderKHR not found via xrGetInstanceProcAddr or dlsym");
+            LOGE("xrInitializeLoaderKHR not found via any method");
             return;
         }
-    } else {
-        LOGD("Found init via xrGetInstanceProcAddr");
     }
 
     // Prepare the init info struct
@@ -333,6 +358,7 @@ static void s_call_xrInitializeLoaderKHR(void* jvm, void* activity) {
     info.applicationVM = jvm;
     info.applicationActivity = activity;
 
+    // Try calling with the struct cast to base header
     typedef XrResult (*FnTy)(const XrLoaderInitInfoBaseHeaderKHR*);
     XrResult r = ((FnTy)initFunc)(&info.base);
     LOGI("xrInitializeLoaderKHR result: %d", r);
