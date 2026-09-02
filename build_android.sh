@@ -1,6 +1,7 @@
 #!/bin/bash
-# Build libopenvr_api.so - DIRECT LINK mode (matches original library)
-# All xr* are GLOBAL UND imports resolved from libopenxr_loader.so at load time
+# Build libopenvr_api.so - DYNAMIC LOAD mode (dlopen + dlsym)
+# NOT linked against libopenxr_loader.so at build time
+# All xr* functions resolved at runtime via dlsym from system's libopenxr_loader.so
 
 set -e
 
@@ -16,24 +17,21 @@ LIB_DIR="${SYSROOT}/usr/lib/aarch64-linux-android/${API_LEVEL}"
 OUTPUT="libopenvr_api.so"
 SOURCES="openxr_loader_wrapper.c"
 
-echo "=== Building libopenvr_api.so (DIRECT LINK to libopenxr_loader.so) ==="
+echo "=== Building libopenvr_api.so (DYNAMIC LOAD - no libopenxr_loader.so link) ==="
 echo "NDK: ${NDK_HOME}"
 
 rm -f ${OUTPUT}
 
 echo "Compiling & linking..."
-# NOTE: We pass libopenxr_loader.so as an INPUT FILE, not with -l / -L
-# This tells clang to:
-#   (a) add libopenxr_loader.so as NEEDED
-#   (b) resolve xr* UND references against it
-# Also add GLESv3, vulkan, m, log, android, dl to match original NEEDED list
+# NOTE: NOT linking against libopenxr_loader.so!
+# xr* functions are resolved at runtime via dlopen + dlsym.
+# Only link against system libraries that are always available.
 ${CC} -O2 -fPIC -shared \
     -I${SYSROOT}/usr/include \
     ${SOURCES} \
-    ${CMAKE_SOURCE_DIR:+./}libopenxr_loader.so \
     -lEGL -lGLESv3 -lvulkan -llog -landroid -ldl -lm \
     -L${LIB_DIR} \
-    -Wl,--no-undefined -Wl,-z,noexecstack \
+    -Wl,-z,noexecstack \
     -o ${OUTPUT}
 
 echo ""
@@ -44,8 +42,8 @@ if [ ! -f "${OUTPUT}" ]; then echo "BUILD FAILED!"; exit 1; fi
 file ${OUTPUT}
 echo ""
 
-echo "=== NEEDED (should match original) ==="
-echo "Expected: libopenxr_loader.so, libEGL.so, libGLESv3.so, libvulkan.so, liblog.so, libandroid.so, libdl.so, libm.so, libc.so"
+echo "=== NEEDED (should NOT have libopenxr_loader.so) ==="
+echo "Expected: libEGL.so, libGLESv3.so, libvulkan.so, liblog.so, libandroid.so, libdl.so, libm.so, libc.so"
 readelf -d ${OUTPUT} | grep NEEDED
 echo ""
 
@@ -57,12 +55,11 @@ echo "=== OpenComposite 3 pointers (OBJECT export, 8 bytes each) ==="
 readelf -s --wide ${OUTPUT} | grep -E "OBJECT.*GLOBAL DEFAULT [0-9]+.*OpenComposite" | head -5
 echo ""
 
-echo "=== Sample xr* - should be GLOBAL DEFAULT UND ==="
-readelf -s --wide ${OUTPUT} | grep -E "UND.*xrCreateInstance|UND.*xrCreateSession|UND.*xrBeginSession|UND.*xrEndFrame|UND.*xrGetInstanceProcAddr" | head -10
-COUNT_XR=$(readelf -s --wide ${OUTPUT} | grep -E "FUNC.*GLOBAL.*UND.*xr[A-Z]" | wc -l)
+echo "=== No xr* UND symbols (should be none - all resolved via dlsym) ==="
+COUNT_XR=$(readelf -s --wide ${OUTPUT} | grep -E "UND.*xr[A-Z]" | wc -l)
+echo "Total xr* UND symbols: ${COUNT_XR} (should be 0)"
 echo ""
-echo "Total xr* UND FUNC symbols: ${COUNT_XR}"
-echo ""
+
 echo "=== Vulkan UND symbols (should be 3) ==="
 readelf -s --wide ${OUTPUT} | grep -E "FUNC.*GLOBAL.*UND.*vk"
 echo ""
