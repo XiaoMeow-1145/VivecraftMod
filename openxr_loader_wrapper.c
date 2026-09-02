@@ -344,27 +344,95 @@ static void s_call_xrInitializeLoaderKHR(void* jvm, void* activity) {
             LOGD("Found init via xrGetInstanceProcAddr");
         } else {
             LOGE("xrInitializeLoaderKHR not found via any method");
-            return;
         }
     }
 
-    // Prepare the init info struct
-    XrLoaderInitInfoAndroidKHR info;
-    memset(&info, 0, sizeof(info));
-    info.base.type = 1000295000;  // XR_TYPE_LOADER_INIT_INFO_ANDROID_KHR
-    info.base.next = NULL;
-    info.applicationVM = jvm;
-    info.applicationActivity = activity;
+    if (initFunc) {
+        // Prepare the init info struct
+        XrLoaderInitInfoAndroidKHR info;
+        memset(&info, 0, sizeof(info));
+        info.base.type = 1000295000;  // XR_TYPE_LOADER_INIT_INFO_ANDROID_KHR
+        info.base.next = NULL;
+        info.applicationVM = jvm;
+        info.applicationActivity = activity;
 
-    // Try calling with the struct cast to base header
-    typedef XrResult (*FnTy)(const XrLoaderInitInfoBaseHeaderKHR*);
-    XrResult r = ((FnTy)initFunc)(&info.base);
-    LOGI("xrInitializeLoaderKHR result: %d", r);
+        // Try calling with the struct cast to base header
+        typedef XrResult (*FnTy)(const XrLoaderInitInfoBaseHeaderKHR*);
+        XrResult r = ((FnTy)initFunc)(&info.base);
+        LOGI("xrInitializeLoaderKHR result: %d", r);
 
-    if (r == 0) {
-        LOGI("OpenXR loader initialized successfully!");
+        if (r == 0) {
+            LOGI("OpenXR loader initialized successfully!");
+        } else {
+            LOGW("xrInitializeLoaderKHR returned %d - continuing anyway", r);
+        }
+    }
+
+    // TEST: Try to create an OpenXR instance to see if the runtime is accessible
+    LOGD("--- TEST: xrCreateInstance with Android create info ---");
+    
+    typedef struct XrApplicationInfo {
+        char applicationName[128];
+        uint32_t applicationVersion;
+        char engineName[128];
+        uint32_t engineVersion;
+        uint32_t apiVersion;
+    } XrApplicationInfo;
+    
+    XrApplicationInfo appInfo;
+    memset(&appInfo, 0, sizeof(appInfo));
+    strncpy(appInfo.applicationName, "TestVR", sizeof(appInfo.applicationName) - 1);
+    appInfo.applicationVersion = 1;
+    strncpy(appInfo.engineName, "Test", sizeof(appInfo.engineName) - 1);
+    appInfo.engineVersion = 1;
+    appInfo.apiVersion = 4194304;  // XR_MAKE_API_VERSION(1, 0, 0) = 0x400000
+    
+    // Full XrInstanceCreateInfo struct matching OpenXR spec
+    typedef struct XrInstanceCreateInfo {
+        int32_t type;
+        const void* next;
+        uint32_t createFlags;
+        XrApplicationInfo applicationInfo;
+        uint32_t enabledApiLayerCount;
+        const void* enabledApiLayerNames;
+        uint32_t enabledExtensionCount;
+        const void* enabledExtensionNames;
+    } XrInstanceCreateInfo;
+    
+    XrInstanceCreateInfo createInfo;
+    memset(&createInfo, 0, sizeof(createInfo));
+    createInfo.type = 1;  // XR_TYPE_INSTANCE_CREATE_INFO
+    createInfo.next = &s_android_create_info;
+    createInfo.createFlags = 0;
+    createInfo.applicationInfo = appInfo;
+    
+    XrInstance instance = 0;
+    XrResult createRes = xr.CreateInstance(&createInfo, &instance);
+    LOGI("--- TEST: xrCreateInstance result: %d, instance=%p ---", createRes, (void*)instance);
+    
+    if (createRes == 0) {
+        LOGI("--- TEST: OpenXR instance created SUCCESSFULLY! ---");
+        
+        // Enumerate system
+        uint64_t systemId = 0;
+        typedef struct XrSystemGetInfo {
+            int32_t type;
+            const void* next;
+            uint32_t formFactor;
+        } XrSystemGetInfo;
+        
+        XrSystemGetInfo sysInfo;
+        memset(&sysInfo, 0, sizeof(sysInfo));
+        sysInfo.type = 5;  // XR_TYPE_SYSTEM_GET_INFO
+        sysInfo.next = NULL;
+        sysInfo.formFactor = 1;  // XR_FORM_FACTOR_HEAD_MOUNTED_DISPLAY
+        
+        XrResult sysRes = xr.GetSystem(instance, &sysInfo, &systemId);
+        LOGI("--- TEST: xrGetSystem result: %d, systemId=%lu ---", sysRes, systemId);
+        
+        xr.DestroyInstance(instance);
     } else {
-        LOGW("xrInitializeLoaderKHR returned %d - continuing anyway", r);
+        LOGE("--- TEST: xrCreateInstance FAILED - OpenXR runtime not accessible! ---");
     }
 }
 
