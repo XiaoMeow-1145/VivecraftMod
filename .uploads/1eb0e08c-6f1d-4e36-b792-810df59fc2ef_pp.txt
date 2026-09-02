@@ -1,0 +1,411 @@
+09-02 12:22:28.759 10593 12129 I NTKernel: [I] recent_contact_codec.cc(594)::DecodeOneRecentContactMsgBox [RC_C]->chat_type:2, uid:329444868, types:2001
+09-02 12:22:28.759 10593 12129 I NTKernel: [I] kernel_msg_service.cc(13649)::OnRecentContactNotification notified_seq is 157, unread cnt 6 listeners.cnt=1
+09-02 12:22:28.759 10593 12129 I NTKernel: [I] recent_contact_common_task_queue.cc(100)::TaskFinished [RC_CTQ]->task 81 finished
+09-02 12:22:28.759 10593 12129 I NTKernel: [I] recent_contact_common_task_queue.cc(175)::RemoveTask [RC_CTQ]->task 81-UpsertRecentContactVer2 finished, start time 1788322946743, cost time 16 ms, rest tasks 1
+09-02 12:22:28.759 10593 12129 I NTKernel: [I] recent_contact_common_task_queue.cc(177)::RemoveTask [RC_CTQ]->remove task 81
+09-02 12:22:28.759 10593 12140 I AppBadgeServiceImpl: [refreshAppBadge] unreadCnt = 6
+09-02 12:22:28.803 10593 12129 I NTKernel: [I] msg_list.cc(161)::GetInfo [MsgListNotify]->Msg list state, list_type:1 seq:306 notificationType:2 location:0 has_delay_msg:1 msg_list_state:[change_total:1 sort_index:7623437119690336564, last_state:Mod, state_list:1-Mod, diff_mask:0]
+09-02 12:22:28.803 10593 12129 I NTKernel: [I] msg_list.cc(161)::GetInfo [MsgListNotify]->Msg list state, list_type:6 seq:307 notificationType:2 location:0 has_delay_msg:1 msg_list_state:[change_total:1 sort_index:7623437119690336564, last_state:Mod, state_list:1-Mod, diff_mask:0]
+09-02 12:22:28.804 10593 12129 I NTKernel: [I] msg_list_notify_mgr.cc(249)::OnNotifyTimer [MsgListNotify]->Notify delay, list_types.size:2 list_types:1,6
+09-02 12:22:28.804 10593 12129 I NTKernel: [I] kernel_msg_service.cc(409)::operator() real notified_seq is 307
+09-02 12:22:28.804 10593 12129 I NTKernel: [I] kernel_msg_service.cc(411)::operator() onRecentContactListChanged
+09-02 12:22:28.804 10593 15363 D RecentContactService: [onRecentContactListChangedV2] seq=307, listtype=1, unreadCnt=6, notifyType=2, loc=0, moreAtBottom=false, sortSize=200, changeSize=1, changeFirst=7623437119690336564 unreadCntByType=1
+09-02 12:22:28.805 10593 15363 I RecentContactService: unreadCntByType null
+09-02 12:22:28.805 10593 15363 I RecentContactService: mapUnreadCache 6
+09-02 12:22:28.805 10593 15363 D RecentContactService: [onRecentContactListChangedV2] seq=307, listtype=6, unreadCnt=0, notifyType=2, loc=0, moreAtBottom=false, sortSize=19, changeSize=1, changeFirst=7623437119690336564 unreadCntByType=
+09-02 12:22:28.805 10593 15363 I RecentContactService: mapUnreadCache 6
+09-02 12:22:28.824   920  1624 I Tracking: CONSTELLATION_Left: [Throttled count=90] P+C Left: Applying Consistent Zero Velocity Update during slow motion.
+09-02 12:22:28.831  9837 10671 V MSF.C.MSFCore[@PS]: [Event] MSFPacketStatistics.cpp(300)::DoCheckRequestTimeout->current rtts:67.368
+09-02 12:22:28.944 10593 12129 I NTKernel: [I] recent_contact_common_task_queue.cc(262)::StopTaskQueueTimer [RC_CTQ]->Stop task queue schedule
+09-02 12:22:28.963   944 19134 W SensorService: Unknown packet type (32) received
+09-02 12:22:29.025  9751 20611 I VrApi   : FPS=91/90,Prd=22ms,Tear=0,Early=0,Stale=0,Stale2/5/10/max=0/0/0/0,VSnc=1,Lat=-4,Fov=0,CPU4/GPU=2/3,1382/492MHz,OC=3F,TA=0/0/0,SP=N/N/N,Mem=2736MHz,Free=2782MB,PLS=0,Temp=38.0C/0.0C,TW=0.61ms,App=2.70ms,GD=0.00ms,CPU&GPU=4.91ms,LCnt=2(DR0,LM0),GPU%=0.33,CPU%=0.18(W0.22),CFL=10.77/14.21,ICFLp95=12.99,LD=0,CABC=1,SF=1.00,LP=1,DVFS=0,ShrpLCnt=1,ShrpR=0.500,SSLCnt=0/0,Preempt=284,PoseAgeP95=0.00
+09-02 12:22:29.025  9751 20611 I VrApi   : ASW=0,Type=PTWFromStereo,E=0.000/0.000,D=0.000/0.000
+09-02 12:22:29.048   943 20602 I VD628x  : Flicker results: freq 220.319443, max 220.409088, dcr 43.957943, pct 0.014001, idx 0.002473, conf 0.095367, snr -9.670428, svm 0.007947, sus 0
+09-02 12:22:29.305 10593 12129 I NTKernel: [I] msg_list_notify_mgr.cc(219)::StopNotifyTimer [MsgListNotify]->Stop notify timer
+09-02 12:22:29.459   944  2175 I libcamerahal: [INSIGHTS][2.00s] recv/ret/req heartbeat: cam0: 90/90/0, cam1: 90/90/0, cam2: 90/90/0, cam3: 90/90/0
+09-02 12:22:29.527  9143 20619 I LayerRender: Explicit geometry layer count: 0, in slice 1
+09-02 12:22:29.757   920  1624 I Tracking: CONSTELLATION_Right: [Throttled count=90] P+C Right: Applying Consistent Zero Velocity Update during slow motion.
+09-02 12:22:29.797  9337 10278 I AutoStationaryHelper: [AutoStationaryHelper::getGuardianDataFromNearbyRoomscale] Checking 1 existing guardian data
+09-02 12:22:29.797  9337 10278 I AutoStationaryHelper: [AutoStationaryHelper::getGuardianDataFromNearbyRoomscale] [1366057508] Distance to HMD: 1.230893
+09-02 12:22:29.810   943 20602 I VD628x  : Flicker results: freq 220.356735, max 220.378494, dcr 43.957943, pct 0.013582, idx 0.002473, conf 0.095367, snr -9.670428, svm 0.008917, sus 0
+09-02 12:22:29.831  9837 10671 V MSF.C.MSFCore[@PS]: [Event] MSFPacketStatistics.cpp(300)::DoCheckRequestTimeout->current rtts:67.368
+09-02 12:22:29.919  9999 10084 W MessageExecutionMonitor: Skipping getStackTrace: target thread state RUNNABLE, MQD callback delayed by 0 ms; risk of ART nterp stack-walk SIGSEGV / suspension timeout
+09-02 12:22:29.919 12631 12752 W MessageExecutionMonitor: Skipping getStackTrace: target thread state RUNNABLE, MQD callback delayed by 0 ms; risk of ART nterp stack-walk SIGSEGV / suspension timeout
+09-02 12:22:30.025  9751 20611 I VrApi   : FPS=91/90,Prd=22ms,Tear=0,Early=0,Stale=0,Stale2/5/10/max=0/0/0/0,VSnc=1,Lat=-4,Fov=0,CPU4/GPU=2/3,1382/492MHz,OC=3F,TA=0/0/0,SP=N/N/N,Mem=2736MHz,Free=2782MB,PLS=0,Temp=38.0C/0.0C,TW=0.62ms,App=2.75ms,GD=0.00ms,CPU&GPU=5.24ms,LCnt=1(DR79,LM0),GPU%=0.33,CPU%=0.18(W0.25),CFL=10.66/14.11,ICFLp95=12.80,LD=0,CABC=1,SF=1.00,LP=1,DVFS=0,Preempt=278,PoseAgeP95=0.00
+09-02 12:22:30.025  9751 20611 I VrApi   : ASW=0,Type=PTWFromStereo,E=0.000/0.000,D=0.000/0.000
+09-02 12:22:30.039  9751  9856 I [SEO] ShellFrameAnalytics: ShellFrame frameFunction: 11142us/54064us, trace: 0us/49us, process commands: 3us/192us, system update: 36us/5034us, render 17us/25546us, input processing 239us/2422us, input dispatch 32us/5020us, stale frames: 2473, refresh rate: 90
+09-02 12:22:30.078  9837 10702 V MSF.C.MSFCore[@DD]: [Event] MSFDDNetworkEngine.cpp(179)::onTcpInfoUpdate->onTcpInfoUpdate:
+09-02 12:22:30.078  9837 10702 V MSF.C.MSFCore[@DD]:                      tcpi_state = 1;
+09-02 12:22:30.078  9837 10702 V MSF.C.MSFCore[@DD]:                      tcpi_ca_state = 0;
+09-02 12:22:30.078  9837 10702 V MSF.C.MSFCore[@DD]:                      tcpi_rto = 356 ms;
+09-02 12:22:30.078  9837 10702 V MSF.C.MSFCore[@DD]:                      tcpi_unacked = 0;
+09-02 12:22:30.078  9837 10702 V MSF.C.MSFCore[@DD]:                      tcpi_rttcur = 79 ms;
+09-02 12:22:30.078  9837 10702 V MSF.C.MSFCore[@DD]:                      tcpi_rttvar = 45 ms;
+09-02 12:22:30.078  9837 10702 V MSF.C.MSFCore[@DD]:                      tcpi_bytes_retrans = 1313 bytes;
+09-02 12:22:30.078  9837 10702 V MSF.C.MSFCore[@DD]:                      tcpi_notsent_bytes = 0 bytes;
+09-02 12:22:30.078  9837 10702 V MSF.C.MSFCore[@DD]:                      tcpi_bytes_received = 192667 bytes;
+09-02 12:22:30.078  9837 10702 V MSF.C.MSFCore[@DD]:                      tcpi_bytes_sent = 30128 bytes
+09-02 12:22:30.078  9837 10702 V MSF.C.MSFCore[@DD]:                      tcpi_last_data_sent = 8850 ms
+09-02 12:22:30.078  9837 10702 V MSF.C.MSFCore[@DD]:                      tcpi_last_data_recv = 1840 ms
+09-02 12:22:30.256  9143 20619 I [CT]    : MIXEDREALITY: PassthroughApiManager: GetUpdatedLayerState: (every 2 seconds) PT is: ON numLayers: 0
+09-02 12:22:30.543  9337 10278 I [CT]    : SP:AF:AnchorFramework: calculateRigidScenePose: Located 16 / 16 anchors in 21694a16-6585-f9c2-5cc5-062bd29a1071 for calculating rigid scene pose for com.oculus.guardian
+09-02 12:22:30.543  9337 10278 I [CT]    : SP:AF:AnchorAccuracy: New Rigid Scene calculated using 16 anchors attached to 2 IAs. 0.12224162699999397 seconds since last update
+09-02 12:22:30.543  9337 10278 I [CT]    : SP:AF:AnchorAccuracy: Translation difference (mean/min/max): 0.0699815534753725 0.013579903170466423 0.10182549059391022
+09-02 12:22:30.543  9337 10278 I [CT]    : SP:AF:AnchorAccuracy: Rotation difference (mean/min/max): 0.036322737782029435 0.0033941855654120445 0.04199963063001633
+09-02 12:22:30.543  9337 10278 I [CT]    : SP:AF:AnchorAccuracy: New scene origin pose: 0.7619274258613586 -0.5858625173568726 4.864098072052002 : 0.49035942554473877 -0.490359365940094 -0.5094582438468933 -0.5094581842422485
+09-02 12:22:30.543  9337 10278 I [CT]    : SP:AF:AnchorAccuracy: New scene origin pose moved: 5.0067901611328125e-06 translation 1.6323404850027146e-07 rotation
+09-02 12:22:30.553   943 20602 I VD628x  : Flicker results: freq 220.356735, max 220.286560, dcr 43.957943, pct 0.013582, idx 0.002473, conf 0.095367, snr -9.670428, svm 0.008694, sus 0
+09-02 12:22:30.610  9143  9300 I FaceEyeTrackingServerManager_Impl: [FaceEyeTrackingServerManager] - orthofitManager is NULL.
+09-02 12:22:30.745  9143 20619 I [CT]    : PTApiClients: 1/1:com.oculus.vrshell,PT=1,EnvDepth=0,VrMode=1,LCnt=0/2(rec=0,proj=0,bg=0),SppMeshes=1(vs=4,ts=2),SppInst=1(vs=4,ts=2),NS=0,Sty=0
+09-02 12:22:30.824   920 19123 I Tracking: BOLT:HexagonTelemetry: Global DSP utilization: 2.01% (100 / 5003 ms), Scalar Util: 44.44%, HVX Util: 52.12%, HMX Util: 7.81%, DMA Active: 0.00%, Freq: 1171.2000000000003 MHz, GetPmu: 0.52 ms
+09-02 12:22:30.824   920 19123 I Tracking: boltlib: DSP Rpc stats over 5003 ms: {"HexagonCornerHarrisEdgeIndexedSlicesAsync":1,"HexagonPyramid3x3Async":50,"controller_inference":25,"dd_boltnn_delegate_batch_256":1}
+09-02 12:22:30.824   920  1624 I Tracking: CONSTELLATION_Left: [Throttled count=89] P+C Left: Applying Consistent Zero Velocity Update during slow motion.
+09-02 12:22:30.831  9837 10671 V MSF.C.MSFCore[@PS]: [Event] MSFPacketStatistics.cpp(300)::DoCheckRequestTimeout->current rtts:67.368
+09-02 12:22:30.917  9337 10278 I AutoStationaryHelper: [AutoStationaryHelper::getGuardianDataFromNearbyRoomscale] Checking 1 existing guardian data
+09-02 12:22:30.917  9337 10278 I AutoStationaryHelper: [AutoStationaryHelper::getGuardianDataFromNearbyRoomscale] [1366057508] Distance to HMD: 1.228068
+09-02 12:22:31.025  9751 20611 I VrApi   : FPS=91/90,Prd=22ms,Tear=0,Early=0,Stale=0,Stale2/5/10/max=0/0/0/0,VSnc=1,Lat=-4,Fov=0,CPU4/GPU=2/3,1382/492MHz,OC=3F,TA=0/0/0,SP=N/N/N,Mem=2736MHz,Free=2782MB,PLS=0,Temp=38.0C/0.0C,TW=0.62ms,App=2.71ms,GD=0.00ms,CPU&GPU=5.16ms,LCnt=1(DR91,LM0),GPU%=0.33,CPU%=0.15(W0.19),CFL=10.59/14.17,ICFLp95=12.89,LD=0,CABC=1,SF=1.00,LP=1,DVFS=0,Preempt=256,PoseAgeP95=0.00
+09-02 12:22:31.025  9751 20611 I VrApi   : ASW=0,Type=PTWFromStereo,E=0.000/0.000,D=0.000/0.000
+09-02 12:22:31.281  9530 22333 I HorizonDsatHelper: fetchTokenValueAsync - callingPackage: com.oculus.horizon, actionName: com.oculus.auth.ACTION_FETCH_HORIZON_DEVICE_SCOPED_CREDENTIALS
+09-02 12:22:31.281  9530 22333 I HorizonDsatHelper: fetchTokenAsync - forceRefresh: false, actionName: com.oculus.auth.ACTION_FETCH_HORIZON_DEVICE_SCOPED_CREDENTIALS
+09-02 12:22:31.281  9530 22333 I HorizonDsatHelper: Returning stored token
+09-02 12:22:31.281  9530 22333 I AuthLogger: Action succeeded: OBTAIN_TOKEN, callingPackage: com.oculus.horizon, accountType: com.oculus, tokenType: dsat, extras: {logging_source=HorizonDsatHelper, options={"forceRefresh":false,"method":"fetchTokenValueAsync","isCachedToken":true}, token_scope=ROOT, outcome=token, status=success}, duration: 0ms
+09-02 12:22:31.281  9530 22333 I HorizonDsatHelper: fetchTokenAsync:: OnResult - callingPackage: com.oculus.horizon, actionName: com.oculus.auth.ACTION_FETCH_HORIZON_DEVICE_SCOPED_CREDENTIALS, forceRefresh: false, isResultPresent: true
+09-02 12:22:31.297   943 20602 I VD628x  : Flicker results: freq 220.356735, max 220.215530, dcr 43.328625, pct 0.013239, idx 0.002727, conf 0.100438, snr -9.415382, svm 0.008626, sus 0
+09-02 12:22:31.459   944  2175 I libcamerahal: [INSIGHTS][2.00s] recv/ret/req heartbeat: cam0: 90/90/0, cam1: 90/90/0, cam2: 90/90/0, cam3: 90/90/0
+09-02 12:22:31.468   920  1620 I Tracking: Vega: [INSIGHTS] Mode=DescriptorVega,6DoF,Agg=26s,Inl=17,29,36,Mem=84.7,FrameDur=6.0,14.8,PoseLat=1.5,7.8,CamImuLat=9.8,29.6,Jit=0.0,0.0,Drops(Cam=0,IMU=0),MeanIr=3665.2,Exp(5.0ms,g=5,I=60)(5.0ms,g=5,I=60)(5.4ms,g=5,I=59)(4.8ms,g=4,I=61)(0.0ms,g=0)(0.0ms,g=0),NonInertEnv=n
+09-02 12:22:31.494   920  1624 I Tracking: CONSTELLATION:VISION_STATUS: 0x848de4907efb503d (R): [#Samples=76] 591.069s | BlobDetection:[#BlobsDetected=(32.47, 21.17)]Matching:[MatchSuccess=1.000, MatchCost=(0.00151, 0.00000), #MatchedBlobs=(23.62, 0.24), #MatchedLeds=(8.00, 0.00), RematchM=1.000, SkipRefine=0.000] MatchMethod:[Prox=0.000, ConstBrute=1.000, AttiBrute=0.000, UnconstBrute=0.000] MatchResets[AnomBlobSize=0.000, SharedMatch=0.000, DenseReacq=0.000] | Fusion:[FusionError=0.000, ImuFromCamMs=(-589569.590, 2138717.781), RematchF=0.000] FusionUpdates:[Successful=0.000, Reliable=0.000, TightFusion=0.000, FullPose=0.000, StaticPrior=0.000, StaticForHandTrans=0.000, PoseUpdateMD=(0.0000, 0.0000)] FusionResets[6DoFReset=0.000, ResetSuccess=0.000] FusionStatus[HasPosition=0.000, HasVelocity=0.000]  [Current time=591.069s, last log time=586.003s]
+09-02 12:22:31.494   920  1624 I Tracking: CONSTELLATION:VISION_STATUS: 0xcc2ed85ec848d4ca (L): [#Samples=76] 591.069s | BlobDetection:[#BlobsDetected=(32.47, 21.17)]Matching:[MatchSuccess=0.947, MatchCost=(0.00046, 0.00000), #MatchedBlobs=(8.57, 28.01), #MatchedLeds=(5.01, 1.96), RematchM=0.908, SkipRefine=0.000] MatchMethod:[Prox=0.000, ConstBrute=0.947, AttiBrute=0.000, UnconstBrute=0.000] MatchResets[AnomBlobSize=0.000, SharedMatch=0.000, DenseReacq=0.000] | Fusion:[FusionError=0.000, ImuFromCamMs=(-589569.590, 2138717.781), RematchF=0.000] FusionUpdates:[Successful=0.000, Reliable=0.000, TightFusion=0.000, FullPose=0.000, StaticPrior=0.000, StaticForHandTrans=0.000, PoseUpdateMD=(0.0000, 0.0000)] FusionResets[6DoFReset=0.000, ResetSuccess=0.000] FusionStatus[HasPosition=0.000, HasVelocity=0.000]  [Current time=591.069s, last log time=586.003s]
+09-02 12:22:31.554   920 19323 I Tracking: CONSTELLATION:IMU_STATUS: 0x848de4907efb503d (R): [#Samples=2525] 591.151s | [FusionTracked=1.000, OutputTracked=1.000, OutputValid=1.000] [AccelSat=0.000, GyroSat=0.000] [AccelMinMeanMax: X=6.083|6.115|6.156, Y=4.962|4.992|5.024, Z=-5.409|-5.380|-5.348] [GyroMinMeanMax: X=-0.006|-0.001|0.004, Y=-0.009|-0.001|0.009, Z=-0.011|-0.004|0.002] [AccelStuck: X=0|0.000, Y=0|0.000, Z=0|0.000] [GyroStuck: X=0|0.000, Y=0|0.000, Z=0|0.000]  [Current time=591.151s, last log time=586.149s]
+09-02 12:22:31.562   920 19323 I Tracking: CONSTELLATION:IMU_STATUS: 0xcc2ed85ec848d4ca (L): [#Samples=2527] 591.159s | [FusionTracked=1.000, OutputTracked=1.000, OutputValid=1.000] [AccelSat=0.000, GyroSat=0.000] [AccelMinMeanMax: X=-5.926|-5.896|-5.864, Y=4.935|4.965|4.996, Z=-5.918|-5.889|-5.853] [GyroMinMeanMax: X=-0.004|0.002|0.006, Y=-0.009|-0.002|0.006, Z=-0.009|0.001|0.006] [AccelStuck: X=0|0.000, Y=0|0.000, Z=0|0.000] [GyroStuck: X=0|0.000, Y=0|0.000, Z=0|0.000]  [Current time=591.159s, last log time=586.157s]
+09-02 12:22:31.682  1024  1024 I crcs    : crcs::subscriber::app_pressure: AppPressureSubscriber: broadcasting pressure cpu=0.9 gpu=0.0 mem=0.0
+09-02 12:22:31.758   920  1624 I Tracking: CONSTELLATION_Right: [Throttled count=89] P+C Right: Applying Consistent Zero Velocity Update during slow motion.
+09-02 12:22:31.831  9837 10671 V MSF.C.MSFCore[@PS]: [Event] MSFPacketStatistics.cpp(300)::DoCheckRequestTimeout->current rtts:67.368
+09-02 12:22:32.022  9337 10278 I AutoStationaryHelper: [AutoStationaryHelper::getGuardianDataFromNearbyRoomscale] Checking 1 existing guardian data
+09-02 12:22:32.022  9337 10278 I AutoStationaryHelper: [AutoStationaryHelper::getGuardianDataFromNearbyRoomscale] [1366057508] Distance to HMD: 1.227726
+09-02 12:22:32.025  9751 20611 I VrApi   : FPS=90/90,Prd=22ms,Tear=0,Early=0,Stale=0,Stale2/5/10/max=0/0/0/0,VSnc=1,Lat=-4,Fov=0,CPU4/GPU=2/3,1382/492MHz,OC=3F,TA=0/0/0,SP=N/N/N,Mem=2736MHz,Free=2782MB,PLS=0,Temp=38.0C/0.0C,TW=0.61ms,App=2.69ms,GD=0.00ms,CPU&GPU=4.99ms,LCnt=1(DR90,LM0),GPU%=0.32,CPU%=0.13(W0.20),CFL=10.94/14.12,ICFLp95=12.85,LD=0,CABC=1,SF=1.00,LP=1,DVFS=0,Preempt=234,PoseAgeP95=0.00
+09-02 12:22:32.025  9751 20611 I VrApi   : ASW=0,Type=PTWFromStereo,E=0.000/0.000,D=0.000/0.000
+09-02 12:22:32.053   943 20602 I VD628x  : Flicker results: freq 220.286560, max 220.089294, dcr 43.328625, pct 0.012612, idx 0.002473, conf 0.100438, snr -9.415382, svm 0.008049, sus 0
+09-02 12:22:32.256  9143 20619 I [CT]    : MIXEDREALITY: PassthroughApiManager: GetUpdatedLayerState: (every 2 seconds) PT is: ON numLayers: 0
+09-02 12:22:32.527  9143 20619 I LayerRender: Explicit geometry layer count: 0, in slice 1
+09-02 12:22:32.538 12631 13112 E ConnectivityStateModule: SocketTimeoutException
+09-02 12:22:32.538 12631 13112 E ConnectivityStateModule: java.net.SocketTimeoutException: failed to connect to portal.fb.com/185.45.5.35 (port 443) from /192.168.1.6 (port 51480) after 10000ms
+09-02 12:22:32.538 12631 13112 E ConnectivityStateModule:       at libcore.io.IoBridge.connectErrno(IoBridge.java:235)
+09-02 12:22:32.538 12631 13112 E ConnectivityStateModule:       at libcore.io.IoBridge.connect(IoBridge.java:179)
+09-02 12:22:32.538 12631 13112 E ConnectivityStateModule:       at java.net.PlainSocketImpl.socketConnect(PlainSocketImpl.java:142)
+09-02 12:22:32.538 12631 13112 E ConnectivityStateModule:       at java.net.AbstractPlainSocketImpl.doConnect(AbstractPlainSocketImpl.java:390)
+09-02 12:22:32.538 12631 13112 E ConnectivityStateModule:       at java.net.AbstractPlainSocketImpl.connectToAddress(AbstractPlainSocketImpl.java:230)
+09-02 12:22:32.538 12631 13112 E ConnectivityStateModule:       at java.net.AbstractPlainSocketImpl.connect(AbstractPlainSocketImpl.java:212)
+09-02 12:22:32.538 12631 13112 E ConnectivityStateModule:       at java.net.SocksSocketImpl.connect(SocksSocketImpl.java:436)
+09-02 12:22:32.538 12631 13112 E ConnectivityStateModule:       at java.net.Socket.connect(Socket.java:646)
+09-02 12:22:32.538 12631 13112 E ConnectivityStateModule:       at com.android.okhttp.internal.Platform.connectSocket(Platform.java:182)
+09-02 12:22:32.538 12631 13112 E ConnectivityStateModule:       at com.android.okhttp.internal.io.RealConnection.connectSocket(RealConnection.java:145)
+09-02 12:22:32.538 12631 13112 E ConnectivityStateModule:       at com.android.okhttp.internal.io.RealConnection.connect(RealConnection.java:116)
+09-02 12:22:32.538 12631 13112 E ConnectivityStateModule:       at com.android.okhttp.internal.http.StreamAllocation.findConnection(StreamAllocation.java:186)
+09-02 12:22:32.538 12631 13112 E ConnectivityStateModule:       at com.android.okhttp.internal.http.StreamAllocation.findHealthyConnection(StreamAllocation.java:128)
+09-02 12:22:32.538 12631 13112 E ConnectivityStateModule:       at com.android.okhttp.internal.http.StreamAllocation.newStream(StreamAllocation.java:97)
+09-02 12:22:32.538 12631 13112 E ConnectivityStateModule:       at com.android.okhttp.internal.http.HttpEngine.connect(HttpEngine.java:289)
+09-02 12:22:32.538 12631 13112 E ConnectivityStateModule:       at com.android.okhttp.internal.http.HttpEngine.sendRequest(HttpEngine.java:232)
+09-02 12:22:32.538 12631 13112 E ConnectivityStateModule:       at com.android.okhttp.internal.huc.HttpURLConnectionImpl.execute(HttpURLConnectionImpl.java:465)
+09-02 12:22:32.538 12631 13112 E ConnectivityStateModule:       at com.android.okhttp.internal.huc.HttpURLConnectionImpl.getResponse(HttpURLConnectionImpl.java:411)
+09-02 12:22:32.538 12631 13112 E ConnectivityStateModule:       at com.android.okhttp.internal.huc.HttpURLConnectionImpl.getResponseCode(HttpURLConnectionImpl.java:542)
+09-02 12:22:32.538 12631 13112 E ConnectivityStateModule:       at com.android.okhttp.internal.huc.DelegatingHttpsURLConnection.getResponseCode(DelegatingHttpsURLConnection.java:106)
+09-02 12:22:32.538 12631 13112 E ConnectivityStateModule:       at com.android.okhttp.internal.huc.HttpsURLConnectionImpl.getResponseCode(HttpsURLConnectionImpl.java:30)
+09-02 12:22:32.538 12631 13112 E ConnectivityStateModule:       at com.facebook.react.panelapp.ConnectivityStateModule.A0G(Unknown Source:49)
+09-02 12:22:32.538 12631 13112 E ConnectivityStateModule:       at X.0eh.run(Unknown Source:2)
+09-02 12:22:32.538 12631 13112 E ConnectivityStateModule:       at java.util.TimerThread.mainLoop(Timer.java:563)
+09-02 12:22:32.538 12631 13112 E ConnectivityStateModule:       at java.util.TimerThread.run(Timer.java:513)
+09-02 12:22:32.552 13252 13460 D TrafficStats: tagSocket(109) with statsTag=0xffffffff, statsUid=-1
+09-02 12:22:32.676 12631 13112 D TrafficStats: tagSocket(98) with statsTag=0xffffffff, statsUid=-1
+09-02 12:22:32.762   920  1620 I Tracking: RateLimiter: Entering Active Window
+09-02 12:22:32.762   944   944 D CameraStream: [ocal] Client [IOT(920)] attempting start
+09-02 12:22:32.763   944   944 I CameraClientManager: [IOT(920)][ocal] client started (estimated 1 started clients total)
+09-02 12:22:32.763   944   944 I CameraClientManager: [[IOT(920)][ocal]] definitely starting stream
+09-02 12:22:32.763   944   944 I SensorService: [color] Starting cameras for purpose ocal
+09-02 12:22:32.763   944   944 I SensorService: doEnableHalCameras[Color] Create SyncbossHandleWrapper
+09-02 12:22:32.765   944   944 I XrCameraHal: XrCameraPhysical.cpp:EnableCamera: Camera 4 EnableCamera
+09-02 12:22:32.765   944   944 E XrCameraHal: Xr3AManager.cpp:getDacModel: camId 4 afCal Slope is 0, invalid calibration
+09-02 12:22:32.765   944   944 I XrCameraHal: Xr3AManager.cpp:onCameraEnabled: Camera 4 enabled for 3A processing
+09-02 12:22:32.765   944   944 I XrCameraHal: XrFrameDistributor.cpp:onEnableCamera: Camera 6: onEnableCamera for physical camera 4
+09-02 12:22:32.765   944   944 I XrCameraHal: XrCameraLogical.cpp:onEnableCamera: Camera (logical) 6 is using camera3
+09-02 12:22:32.765   894   894 I SDM     : ResourceImpl::SetMaxBandwidthMode: new bandwidth mode=1
+09-02 12:22:32.765   894   894 I SDM     : ResourceAlloc::SetMaxBandwidthMode: new bandwidth mode=1
+09-02 12:22:32.765   944   944 I XrCameraHal: XrStreamManager.cpp:configureStreams: Camera (logical) 6 configuring streams
+09-02 12:22:32.767   938   962 I SyncBossFW:  592366 [info   ] {GCM }: general_cam_mgr_deinit for cameras 0x30
+09-02 12:22:32.767   944   944 I VrSensors-HidlWrapper: Create IMU Sensor using fmq
+09-02 12:22:32.770   944   944 I VrSensors-HidlWrapper: Create IMU Sensor using fmq
+09-02 12:22:32.770   938   962 W SyncBossFW:  592366 [warning] {GCM }: Camera imx471[0x10] not primed yet
+09-02 12:22:32.770   938   962 W SyncBossFW:  592366 [warning] {GCM }: Camera imx471[0x20] not primed yet
+09-02 12:22:32.770   944   944 E [IspController]: Failed to get sensor foveation mode
+09-02 12:22:32.790   944   944 I CorePi: AWB cam0: AWBInterface.cpp: 400 createCorePiAWBInterface: Enter
+09-02 12:22:32.790   944   944 I CorePi: AWB cam0: AWBCore.cpp: 438 initialize: Tuning version: 1.0.0
+09-02 12:22:32.790   944   944 I CorePi: AWB cam0: AWBCore.cpp: 35 createAWBCoreInterface: create AWB success, version: 1.4.9
+09-02 12:22:32.790   944   944 I CorePi: AWB cam0: AWBInterface.cpp: 419 createCorePiAWBInterface: Create Meta AWB interface succeed!
+09-02 12:22:32.805     0     0 I CAM_INFO: CAM-SENSOR: cam_sensor_driver_cmd: 1211 CAM_ACQUIRE_DEV Success for imx471 id:0x471,slave-addr:0x34 crm:[0]
+09-02 12:22:32.808     4     4 I CAM_INFO: CAM-SMMU: cam_smmu_map_user_iova: 3257 fd=839 already in list [4:22:32:792] cb=ife idx=0 handle=35304 len=573440,give same addr back
+09-02 12:22:32.809     4     4 I CAM_INFO: CAM-SMMU: cam_smmu_map_user_iova: 3257 fd=840 already in list [4:22:32:792] cb=ife idx=0 handle=35304 len=471040,give same addr back
+09-02 12:22:32.809     4     4 I CAM_INFO: CAM-SMMU: cam_smmu_map_user_iova: 3257 fd=841 already in list [4:22:32:793] cb=ife idx=0 handle=35304 len=495616,give same addr back
+09-02 12:22:32.809   944   944 I CorePi: AWB cam0: AWBInterface.cpp: 400 createCorePiAWBInterface: Enter
+09-02 12:22:32.809   944   944 I CorePi: AWB cam0: AWBCore.cpp: 438 initialize: Tuning version: 1.0.0
+09-02 12:22:32.809   944   944 I CorePi: AWB cam0: AWBCore.cpp: 35 createAWBCoreInterface: create AWB success, version: 1.4.9
+09-02 12:22:32.810   944   944 I CorePi: AWB cam0: AWBInterface.cpp: 419 createCorePiAWBInterface: Create Meta AWB interface succeed!
+09-02 12:22:32.822     0     0 I CAM_INFO: CAM-SENSOR: cam_sensor_driver_cmd: 1211 CAM_ACQUIRE_DEV Success for imx471 id:0x471,slave-addr:0x34 crm:[0]
+09-02 12:22:32.827     4     4 I CAM_INFO: CAM-SMMU: cam_smmu_map_user_iova: 3257 fd=908 already in list [4:22:32:811] cb=ife idx=0 handle=35304 len=573440,give same addr back
+09-02 12:22:32.828     4     4 I CAM_INFO: CAM-SMMU: cam_smmu_map_user_iova: 3257 fd=909 already in list [4:22:32:812] cb=ife idx=0 handle=35304 len=471040,give same addr back
+09-02 12:22:32.828     4     4 I CAM_INFO: CAM-SMMU: cam_smmu_map_user_iova: 3257 fd=910 already in list [4:22:32:812] cb=ife idx=0 handle=35304 len=495616,give same addr back
+09-02 12:22:32.835     0     0 I CAM_INFO: CAM-CRM: cam_req_mgr_link_v3: 4951 link reserved 0000000000000000 0 trigger_type:1 num_devs:2 sess_hdl:8847892 no_crm:4
+09-02 12:22:32.835     0     0 I CAM_INFO: CAM-ISP: cam_ife_hw_mgr_print_acquire_info: 2027 4:22:32.819 Acquired Single IFE[1] with [9 pix] [0 pd] [0 rdi] ports for ctx:8 per_port_enabled :0 sensor:-559038737 ul: 0
+09-02 12:22:32.825   943 20602 I VD628x  : Flicker results: freq 220.215530, max 220.081924, dcr 43.328625, pct 0.011890, idx 0.002402, conf 0.100438, snr -9.415382, svm 0.007275, sus 0
+09-02 12:22:32.827   920  1624 I Tracking: CONSTELLATION_Left: [Throttled count=89] P+C Left: Applying Consistent Zero Velocity Update during slow motion.
+09-02 12:22:32.835     0     0 I CAM_INFO: CAM-ISP: __cam_isp_ctx_acquire_hw_v2: 9792 NO CRM session,top state machine assigned for no crm ctx 8
+09-02 12:22:32.843     0     0 I CAM_INFO: CAM-ISP: __cam_isp_ctx_start_dev_in_ready: 10826 Start IFE device ctx 8 with irq state machine [Activated State Machine IRQ] in initial SubState [SOF] UL_path 0
+09-02 12:22:32.845     0     0 I CAM_INFO: CAM-SENSOR: cam_sensor_driver_cmd: 1352 4:22:32.829 CAM_START_DEV[5] Success for imx471 sensor_id:0x471,sensor_slave_addr:0x34
+09-02 12:22:32.845     0     0 I CAM_INFO: CAM-CRM: cam_req_mgr_link_v3: 4951 link reserved 0000000000000000 0 trigger_type:1 num_devs:2 sess_hdl:8847892 no_crm:4
+09-02 12:22:32.845     0     0 I CAM_INFO: CAM-ISP: cam_ife_hw_mgr_print_acquire_info: 2027 4:22:32.829 Acquired Single IFE[0] with [9 pix] [0 pd] [0 rdi] ports for ctx:9 per_port_enabled :0 sensor:-559038737 ul: 0
+09-02 12:22:32.831  9837 10671 V MSF.C.MSFCore[@PS]: [Event] MSFPacketStatistics.cpp(300)::DoCheckRequestTimeout->current rtts:67.368
+09-02 12:22:32.833   944   944 I XrCameraHal: XrCameraPhysical.cpp:EnableCamera: Camera 5 EnableCamera
+09-02 12:22:32.833   944   944 E XrCameraHal: Xr3AManager.cpp:getDacModel: camId 5 afCal Slope is 0, invalid calibration
+09-02 12:22:32.833   944   944 I XrCameraHal: Xr3AManager.cpp:onCameraEnabled: Camera 5 enabled for 3A processing
+09-02 12:22:32.833   944   944 I XrCameraHal: XrFrameDistributor.cpp:onEnableCamera: Camera 6: onEnableCamera for physical camera 5
+09-02 12:22:32.833   944   944 I XrCameraHal: XrCameraLogical.cpp:onEnableCamera: Camera (logical) 5 already enabled
+09-02 12:22:32.833   944   944 I SensorService: doEnableHalCameras[Color] FsyncEventHandler::GetInstance
+09-02 12:22:32.845     0     0 I CAM_INFO: CAM-ISP: __cam_isp_ctx_acquire_hw_v2: 9792 NO CRM session,top state machine assigned for no crm ctx 9
+09-02 12:22:32.849     0     0 I CAM_INFO: CAM-ISP: __cam_isp_ctx_start_dev_in_ready: 10826 Start IFE device ctx 9 with irq state machine [Activated State Machine IRQ] in initial SubState [SOF] UL_path 0
+09-02 12:22:32.837   938   962 I SyncBossFW:  592436 [info   ] {APPI}: Init Cameras: 0x30
+09-02 12:22:32.837   938   962 I SyncBossFW:  592436 [info   ] {GCM }: general_cam_mgr_init for cameras 0x30
+09-02 12:22:32.875   944  1539 W SyncBossHAL: Duplicate matched timestamp for camera 0: prev: 592452768us (arrival: 1825799858us, count: 25112), curr: 592452768us (arrival: 1825799858us, count: 25112)
+09-02 12:22:32.875   944  1539 E NiceCameraSystem: cam0: duplicate timestamps detected (592452768000 and 1825811323541)->(592452768000 and 1825825515209)
+09-02 12:22:32.875   944  1539 E FrameSetCollator: [{WT:RAW10}] rejecting frame: cam id 0 Frame arrived too late wrt previous timestamp. new: 592452768000, previous: 592452768000, arrivalSys-captureSys: 24698886ns, arrivalFsc-arrivalSys: 238386ns
+09-02 12:22:32.875   944  1539 W SyncBossHAL: Duplicate matched timestamp for camera 3: prev: 592452768us (arrival: 1825799858us, count: 25112), curr: 592452768us (arrival: 1825799858us, count: 25112)
+09-02 12:22:32.875   944  1539 E NiceCameraSystem: cam3: duplicate timestamps detected (592452768000 and 1825811261197)->(592452768000 and 1825825538438)
+09-02 12:22:32.875   944  1539 E FrameSetCollator: [{WT:RAW10}] rejecting frame: cam id 3 Frame arrived too late wrt previous timestamp. new: 592452768000, previous: 592452768000, arrivalSys-captureSys: 25030762ns, arrivalFsc-arrivalSys: 180833ns
+09-02 12:22:32.875   944  1539 W SyncBossHAL: Duplicate matched timestamp for camera 2: prev: 592452768us (arrival: 1825799858us, count: 25112), curr: 592452768us (arrival: 1825799858us, count: 25112)
+09-02 12:22:32.875   944  1539 E NiceCameraSystem: cam2: duplicate timestamps detected (592452768000 and 1825811502916)->(592452768000 and 1825825537188)
+09-02 12:22:32.876   944  1539 E FrameSetCollator: [{WT:RAW10}] rejecting frame: cam id 2 Frame arrived too late wrt previous timestamp. new: 592452768000, previous: 592452768000, arrivalSys-captureSys: 25249668ns, arrivalFsc-arrivalSys: 159687ns
+09-02 12:22:32.876   944  1539 W SyncBossHAL: Duplicate matched timestamp for camera 1: prev: 592452768us (arrival: 1825799858us, count: 25112), curr: 592452768us (arrival: 1825799858us, count: 25112)
+09-02 12:22:32.876   944  1539 E NiceCameraSystem: cam1: duplicate timestamps detected (592452768000 and 1825811331145)->(592452768000 and 1825825514479)
+09-02 12:22:32.876   944  1539 E FrameSetCollator: [{WT:RAW10}] rejecting frame: cam id 1 Frame arrived too late wrt previous timestamp. new: 592452768000, previous: 592452768000, arrivalSys-captureSys: 25442741ns, arrivalFsc-arrivalSys: 300833ns
+09-02 12:22:32.894   944  1539 E FrameSetCollator: [{WT:RAW10}] 1 FrameSets had unexpected timestamps (in the last 387787.07ms). Ex: slot 2 592452.768ms -> 592486.100ms (observed period: 33.332ms, expected period: 16.666ms (16.666ms))
+09-02 12:22:32.896   944   944 I FrameSetCollator: [{COL:FULPS}] started at 1825.85
+09-02 12:22:32.896   944   944 I SensorService: [color] Starting camera streams for purpose: ocal, current muxmode = 1
+09-02 12:22:32.896   944   944 I XrCameraHal: XrCameraPhysical.cpp:Start: Camera 4 StartCamera
+09-02 12:22:32.896   944   944 I XrCameraHal: XrStreamManager.cpp:startStreaming: Camera (logical) 6 starting stream thread
+09-02 12:22:32.897   944   944 W libcamerahal: CameraHalTelemetry::registerCamera: camera 4 already registered, reusing
+09-02 12:22:32.897   944   944 I XrCameraHal: XrCameraPhysical.cpp:Start: Camera 5 StartCamera
+09-02 12:22:32.897   944   944 I XrCameraHal: XrCameraLogical.cpp:onStartCamera: Camera 5 already started
+09-02 12:22:32.897   944   944 W libcamerahal: CameraHalTelemetry::registerCamera: camera 5 already registered, reusing
+09-02 12:22:32.897   944 22343 I XrCameraHal: Xr3AManager.cpp:applyFrameBasedSettings: isp set Camera: 4, framerate to 60
+09-02 12:22:32.897   944 22343 I XrCameraHal: Xr3AManager.cpp:applyFrameBasedSettings: isp set Camera: 5, framerate to 60
+09-02 12:22:32.897   938   962 I SyncBossFW:  592496 [info   ] {GCM }: general_cam_mgr_set_frame_rate_config cams 0x30 period 16666us
+09-02 12:22:32.899   944   944 I CameraClientManager: [[IOT(920)][ocal]] stream start completed
+09-02 12:22:32.899   944   944 D CameraStream: [ocal] Client [IOT(920)]: start complete
+09-02 12:22:32.899   920  1621 I VrSensors-HidlWrapper: Sending mux states (multiple) update to client
+09-02 12:22:32.899   920  1621 I SensorDataTransforms: [iot:ocal] Staging mux mode updates for {color: ind-1, seqId-68},
+09-02 12:22:32.899   920  1621 I SensorDataTransforms: [iot:ocal] Signaling start of the mode transition
+09-02 12:22:32.899   920  1621 I TrackingService: [iot:ocal] Start configuration update starting
+09-02 12:22:32.899   920  1621 I TrackingService: [iot:ocal] Start configuration update done
+09-02 12:22:32.899   920  1621 I SensorDataTransforms: [iot:ocal] Mux mode updates successfully staged
+09-02 12:22:32.899   920  1621 D TrackingService: [ocal]start onMuxStateUpdate. ModeId: default -> default
+09-02 12:22:32.899   920  1621 D TrackingService: [iot][ocal]handleMuxModeNotification started for muxMode[color: default]
+09-02 12:22:32.899   920  1621 E TrackingService: Resetting MuxMode default which is already set
+09-02 12:22:32.899   920  1621 D TrackingService: [ocal]end onMuxStateUpdate. ModeId: default -> default
+09-02 12:22:32.899   920  1621 I TrackingService: [                        iot:ocal] Mux Mode Transition from sensor service: default -> default transition time: 0 ms
+09-02 12:22:32.899  1239  1635 I MRSS    : BOLT:HexagonTelemetry: Global DSP utilization: 2.00% (100 / 5002 ms), Scalar Util: 44.55%, HVX Util: 52.11%, HMX Util: 7.83%, DMA Active: 0.00%, Freq: 1171.2 MHz, GetPmu: 0.71 ms
+09-02 12:22:32.900  1239  1635 I MRSS    : boltlib: DSP Rpc stats over 5002 ms: null
+09-02 12:22:32.901   944 22344 I libsensorscommon: Set /sys/fs/cgroup/uid_1000/memory.min to 150000000
+09-02 12:22:32.901   938   962 I SyncBossFW:  592498 [info   ] {GCM }: general_cam_mgr_get_stream_info for cameras 0x10
+09-02 12:22:32.901   938   962 I SyncBossFW:  592499 [info   ] {GCM }: general_cam_mgr_start_streaming for cameras 0x30
+09-02 12:22:32.952   920  1621 I TrackingService: [iot:ocal] Configuration update starting
+09-02 12:22:32.952   920  1621 I TrackingService: [iot:ocal] Configuration update done
+09-02 12:22:32.952   920  1621 I TrackingService: [iot:ocal] Finish configuration update starting
+09-02 12:22:32.952   920  1621 I TrackingService: [iot:ocal] Finish configuration update done
+09-02 12:22:32.969   920  1620 I Tracking: RateLimiter: First Active Window frameset available. Window will remain active for 1 seconds
+09-02 12:22:33.025  9751 20611 I VrApi   : FPS=91/90,Prd=22ms,Tear=0,Early=0,Stale=0,Stale2/5/10/max=0/0/0/0,VSnc=1,Lat=-4,Fov=0,CPU4/GPU=2/3,1382/492MHz,OC=3F,TA=0/0/0,SP=N/N/N,Mem=2736MHz,Free=2782MB,PLS=0,Temp=38.0C/0.0C,TW=0.65ms,App=2.76ms,GD=0.00ms,CPU&GPU=5.34ms,LCnt=1(DR90,LM0),GPU%=0.32,CPU%=0.15(W0.17),CFL=10.97/14.23,ICFLp95=12.94,LD=0,CABC=1,SF=1.00,LP=1,DVFS=0,Preempt=222,PoseAgeP95=0.00
+09-02 12:22:33.025  9751 20611 I VrApi   : ASW=0,Type=PTWFromStereo,E=0.000/0.000,D=0.000/0.000
+09-02 12:22:33.082  9837 10702 V MSF.C.MSFCore[@DD]: [Event] MSFDDNetworkEngine.cpp(179)::onTcpInfoUpdate->onTcpInfoUpdate:
+09-02 12:22:33.082  9837 10702 V MSF.C.MSFCore[@DD]:                      tcpi_state = 1;
+09-02 12:22:33.082  9837 10702 V MSF.C.MSFCore[@DD]:                      tcpi_ca_state = 0;
+09-02 12:22:33.082  9837 10702 V MSF.C.MSFCore[@DD]:                      tcpi_rto = 356 ms;
+09-02 12:22:33.082  9837 10702 V MSF.C.MSFCore[@DD]:                      tcpi_unacked = 0;
+09-02 12:22:33.082  9837 10702 V MSF.C.MSFCore[@DD]:                      tcpi_rttcur = 79 ms;
+09-02 12:22:33.082  9837 10702 V MSF.C.MSFCore[@DD]:                      tcpi_rttvar = 45 ms;
+09-02 12:22:33.082  9837 10702 V MSF.C.MSFCore[@DD]:                      tcpi_bytes_retrans = 1313 bytes;
+09-02 12:22:33.082  9837 10702 V MSF.C.MSFCore[@DD]:                      tcpi_notsent_bytes = 0 bytes;
+09-02 12:22:33.082  9837 10702 V MSF.C.MSFCore[@DD]:                      tcpi_bytes_received = 192667 bytes;
+09-02 12:22:33.082  9837 10702 V MSF.C.MSFCore[@DD]:                      tcpi_bytes_sent = 30128 bytes
+09-02 12:22:33.082  9837 10702 V MSF.C.MSFCore[@DD]:                      tcpi_last_data_sent = 11854 ms
+09-02 12:22:33.082  9837 10702 V MSF.C.MSFCore[@DD]:                      tcpi_last_data_recv = 4844 ms
+09-02 12:22:33.126  9337 10278 I AutoStationaryHelper: [AutoStationaryHelper::getGuardianDataFromNearbyRoomscale] Checking 1 existing guardian data
+09-02 12:22:33.126  9337 10278 I AutoStationaryHelper: [AutoStationaryHelper::getGuardianDataFromNearbyRoomscale] [1366057508] Distance to HMD: 1.227734
+09-02 12:22:33.197   944  1065 I DUMPSYS_LOG: {"additional_data":{"camera_fps":[{"fps":3.2604883858742668,"frames":70,"id":4},{"fps":3.2604883858742668,"frames":70,"id":5}]},"event":"CameraFPS","service":"SensorService","tid":"499596696368","ts":1788322953197263,"ts_proc":1826155233}
+09-02 12:22:33.246  9837 10552 D MSF:WakeLock: [MSF:WakeLock:MsgPush] wakeLock release
+09-02 12:22:33.460   944  2175 I libcamerahal: [INSIGHTS][2.00s] recv/ret/req heartbeat: cam0: 90/90/0, cam1: 90/90/0, cam2: 90/90/0, cam3: 90/90/0
+09-02 12:22:33.620   943 20602 I VD628x  : Flicker results: freq 220.089294, max 220.022507, dcr 43.885494, pct 0.010645, idx 0.002250, conf 0.089578, snr -9.815007, svm 0.007021, sus 0
+09-02 12:22:33.759   920  1624 I Tracking: CONSTELLATION_Right: [Throttled count=88] P+C Right: Applying Consistent Zero Velocity Update during slow motion.
+09-02 12:22:33.832  9837 10671 V MSF.C.MSFCore[@PS]: [Event] MSFPacketStatistics.cpp(300)::DoCheckRequestTimeout->current rtts:67.368
+09-02 12:22:33.967   944 19134 W SensorService: Unknown packet type (32) received
+09-02 12:22:34.025  9751 20611 I VrApi   : FPS=91/90,Prd=22ms,Tear=0,Early=0,Stale=0,Stale2/5/10/max=0/0/0/0,VSnc=1,Lat=-4,Fov=0,CPU4/GPU=2/3,1382/492MHz,OC=3F,TA=0/0/0,SP=N/N/N,Mem=2736MHz,Free=2782MB,PLS=0,Temp=38.0C/0.0C,TW=0.63ms,App=2.71ms,GD=0.00ms,CPU&GPU=5.03ms,LCnt=1(DR90,LM0),GPU%=0.32,CPU%=0.15(W0.17),CFL=10.94/14.20,ICFLp95=12.90,LD=0,CABC=1,SF=1.00,LP=1,DVFS=0,Preempt=228,PoseAgeP95=0.00
+09-02 12:22:34.025  9751 20611 I VrApi   : ASW=0,Type=PTWFromStereo,E=0.000/0.000,D=0.000/0.000
+09-02 12:22:34.037   920  1620 I Tracking: RateLimiter: Stats: Number of valid framesets = 16 in this active window
+09-02 12:22:34.038   944   944 D CameraStream: [ocal] Client [IOT(920)] attempting stop
+09-02 12:22:34.038   944   944 I CameraClientManager: [IOT(920)][ocal] client stopped (estimated 0 started clients remaining)
+09-02 12:22:34.038   944   944 I CameraClientManager: [[IOT(920)][ocal]] definitely stopping stream
+09-02 12:22:34.038   944   944 I SensorService: [color] Stopping cameras for purpose ocal
+09-02 12:22:34.038   944   944 I FrameSetCollator: [{COL:FULPS}] stopped. Ran for 1.14s
+09-02 12:22:34.038   944   944 I SensorService: [color] Stopping camera streams for purpose: ocal
+09-02 12:22:34.038   944   944 I libcamerahal: CameraBase::StopCamera: Camera 4 stopping (forceStop=0)
+09-02 12:22:34.038   944   944 I libcamerahal: [INSIGHTS][1.08s] recv/ret/req heartbeat (final): cam4: 66/66/0, cam5: 66/66/0
+09-02 12:22:34.038   944   944 I libcamerahal: CameraHalTelemetry: unregistered camera 4
+09-02 12:22:34.038   944   944 I XrCameraHal: XrCameraPhysical.cpp:Stop: Camera 4 StopCamera (forceStop=0)
+09-02 12:22:34.038   944   944 I XrCameraHal: XrCameraPhysical.cpp:Stop: Camera 4 Stop successful, state changed to Stopped
+09-02 12:22:34.038   944   944 I libcamerahal: CameraBase::StopCamera: Camera 4 Stop() returned 1 (forceStop=0)
+09-02 12:22:34.038   944   944 I libcamerahal: CameraBase::StopCamera: Camera 5 stopping (forceStop=0)
+09-02 12:22:34.038   944   944 I libcamerahal: [INSIGHTS][0.00s] recv/ret/req heartbeat (final): cam5: 0/0/0
+09-02 12:22:34.038   944   944 I libcamerahal: CameraHalTelemetry: unregistered camera 5
+09-02 12:22:34.038   944   944 I XrCameraHal: XrCameraPhysical.cpp:Stop: Camera 5 StopCamera (forceStop=0)
+09-02 12:22:34.038   944   944 I XrCameraHal: XrStreamManager.cpp:stopStreaming: Camera (logical) 6 Camera stop streaming (running_ is currently 1)
+09-02 12:22:32.849     0     0 I CAM_INFO: CAM-SENSOR: cam_sensor_driver_cmd: 1352 4:22:32.833 CAM_START_DEV[4] Success for imx471 sensor_id:0x471,sensor_slave_addr:0x34
+09-02 12:22:34.057     0     0 I CAM_INFO: CAM-ISP: __cam_isp_ctx_flush_req_in_top_state: 6201 Last request id to flush is 70, ctx_id:8
+09-02 12:22:34.038   944   944 I XrCameraHal: XrStreamManager.cpp:stopStreaming: Camera (logical) 6 About to call destroyRequestThread
+09-02 12:22:34.038   944   944 I XrCameraHal: XrStreamManager.cpp:destroyRequestThread: Camera (logical) 6 destroyRequestThread: running_ flag changed from 1 to false
+09-02 12:22:34.039   944   944 I XrCameraHal: XrStreamManager.cpp:destroyRequestThread: Camera (logical) 6 destroying request thread
+09-02 12:22:34.040   944 22343 I XrCameraHal: XrStreamManager.cpp:streamLoop: Camera (logical) 6 stream loop complete
+09-02 12:22:34.040   944   944 I XrCameraHal: XrStreamManager.cpp:destroyRequestThread: Camera (logical) 6 destroyRequestThread: thread joined successfully, running_ is now 0
+09-02 12:22:34.040   944   944 I XrCameraHal: XrStreamManager.cpp:stopStreaming: Camera (logical) 6 Camera calling flush
+09-02 12:22:34.040   944   944 I CamX    : [ DUMP][HAL    ] camxhaldevice.cpp:3297 LogRequest() Frame Number ## REQUEST_ERROR ## RESULT_ERROR ## BUFFER_ERROR ## Shutter ##  Metadata[Rcvd/Tot] ## Output[Rcvd/Tot(inErr)] ## Input ## S0[Rcvd/StatusOK/BufErrNotify](0xb400007387199280)[0] ## S1[Rcvd/StatusOK/BufErrNotify](0xb400007387199dc0)[0] ##
+09-02 12:22:34.042   944   944 I XrCameraHal: XrStreamManager.cpp:stopStreaming: Camera (logical) 6 Camera flush completed
+09-02 12:22:34.042   944   944 I XrCameraHal: XrStreamManager.cpp:stopStreaming: Camera (logical) 6 Camera flushed buffers
+09-02 12:22:34.042   944   944 I XrCameraHal: XrStreamManager.cpp:stopStreaming: Camera (logical) 6 stopStreaming completed successfully, running_ is now 0
+09-02 12:22:34.042   944   944 I XrCameraHal: XrCameraPhysical.cpp:Stop: Camera 5 Stop successful, state changed to Stopped
+09-02 12:22:34.042   944   944 I libcamerahal: CameraBase::StopCamera: Camera 5 Stop() returned 1 (forceStop=0)
+09-02 12:22:34.057     0     0 I CAM_INFO: CAM-ISP: __cam_isp_ctx_flush_req_in_top_state: 6223 Stop HW complete. Reset HW next.
+09-02 12:22:34.058     0     0 I CAM_INFO: CAM-ISP: __cam_isp_ctx_flush_req_in_top_state: 6201 Last request id to flush is 70, ctx_id:9
+09-02 12:22:34.058     0     0 I CAM_INFO: CAM-ISP: __cam_isp_ctx_flush_req_in_top_state: 6223 Stop HW complete. Reset HW next.
+09-02 12:22:34.058     0     0 I CAM_WARN: CAM-CORE: cam_context_handle_flush_dev: 547 No flush device in dev 5832983, state 4
+09-02 12:22:34.046   938   962 I SyncBossFW:  593645 [info   ] {GCM }: general_cam_mgr_stop_streaming for cameras 0x30
+09-02 12:22:34.048   938   962 I SyncBossFW:  593648 [info   ] {GCM }: general_cam_mgr_deinit for cameras 0x30
+09-02 12:22:34.073   944   944 I XrCameraHal: XrCameraPhysical.cpp:DisableCamera: Camera 4 DisableCamera
+09-02 12:22:34.073   944   944 I XrCameraHal: Xr3AManager.cpp:onCameraDisabled: Camera 4 disabled for 3A processing
+09-02 12:22:34.073   944   944 I XrCameraHal: XrFrameDistributor.cpp:onDisableCamera: Camera 6: onDisableCamera for physical camera 4
+09-02 12:22:34.073   944   944 I XrCameraHal: XrCameraPhysical.cpp:DisableCamera: Camera 5 DisableCamera
+09-02 12:22:34.073   944   944 I XrCameraHal: Xr3AManager.cpp:onCameraDisabled: Camera 5 disabled for 3A processing
+09-02 12:22:34.073   944   944 I XrCameraHal: XrFrameDistributor.cpp:onDisableCamera: Camera 6: onDisableCamera for physical camera 5
+09-02 12:22:34.073   944   944 I XrCameraHal: XrStreamManager.cpp:stopStreaming: Camera (logical) 6 Camera stop streaming (running_ is currently 0)
+09-02 12:22:34.073   944   944 E XrCameraHal: XrStreamManager.cpp:stopStreaming: Camera (logical) 6 trying to stop stream that is not running on camera
+09-02 12:22:34.073   944   944 I XrCameraHal: XrStreamManager.cpp:teardownStreams: Camera (logical) 6 Camera teardownStreams()
+09-02 12:22:34.073   944   944 I XrCameraHal: XrStreamManager.cpp:teardownStreams: Camera (logical) 6 Camera close()
+09-02 12:22:34.073   894   894 I SDM     : ResourceImpl::SetMaxBandwidthMode: new bandwidth mode=0
+09-02 12:22:34.073   894   894 I SDM     : ResourceAlloc::SetMaxBandwidthMode: new bandwidth mode=0
+09-02 12:22:34.058     0     0 I CAM_WARN: CAM-CORE: cam_context_handle_flush_dev: 547 No flush device in dev 12845339, state 4
+09-02 12:22:34.090     0     0 I CAM_WARN: CAM-CORE: cam_context_handle_flush_dev: 547 No flush device in dev 5832983, state 4
+09-02 12:22:34.090     0     0 I CAM_WARN: CAM-CORE: cam_context_handle_flush_dev: 547 No flush device in dev 12845339, state 4
+09-02 12:22:34.091     0     0 I CAM_WARN: CAM-CORE: cam_context_handle_flush_dev: 547 No flush device in dev 5832983, state 4
+09-02 12:22:34.091     0     0 I CAM_WARN: CAM-CORE: cam_context_handle_flush_dev: 547 No flush device in dev 12845339, state 4
+09-02 12:22:34.094     0     0 I CAM_INFO: CAM-SENSOR: cam_sensor_driver_cmd: 1391 4:22:34.77 CAM_STOP_DEV Success for imx471 sensor_id:0x471,sensor_slave_addr:0x34
+09-02 12:22:34.094     0     0 I CAM_INFO: CAM-ISP: cam_ife_mgr_release_hw: 11425 4:22:34.78 Release HW success ctx id: 8
+09-02 12:22:34.096     0     0 I CAM_INFO: CAM-SENSOR: cam_sensor_driver_cmd: 1391 4:22:34.80 CAM_STOP_DEV Success for imx471 sensor_id:0x471,sensor_slave_addr:0x34
+09-02 12:22:34.096     0     0 I CAM_INFO: CAM-ISP: cam_ife_mgr_release_hw: 11425 4:22:34.80 Release HW success ctx id: 9
+09-02 12:22:34.101     0     0 I CAM_INFO: CAM-SENSOR: cam_sensor_driver_cmd: 1270 CAM_RELEASE_DEV Success for imx471 sensor_id:0x471, slave_addr:0x34
+09-02 12:22:34.121   944   944 I CamX    : [ DUMP][HAL    ] camxhaldevice.cpp:3997 PrintErrorSummary() ==================================================================================
+09-02 12:22:34.121   944   944 I CamX    : [ DUMP][HAL    ] camxhaldevice.cpp:3999 PrintErrorSummary() + Num Unknown Frame Error                   : 0
+09-02 12:22:34.121   944   944 I CamX    : [ DUMP][HAL    ] camxhaldevice.cpp:4001 PrintErrorSummary() + Num Unexpected Shutter                    : 66
+09-02 12:22:34.121   944   944 I CamX    : [ DUMP][HAL    ] camxhaldevice.cpp:4003 PrintErrorSummary() + Num Unexpected Request Error Notification : 0
+09-02 12:22:34.121   944   944 I CamX    : [ DUMP][HAL    ] camxhaldevice.cpp:4005 PrintErrorSummary() + Num Unexpected Buffer Error Notification  : 0
+09-02 12:22:34.121   944   944 I CamX    : [ DUMP][HAL    ] camxhaldevice.cpp:4007 PrintErrorSummary() + Num Unexpected Metadata Error Notification: 0
+09-02 12:22:34.121   944   944 I CamX    : [ DUMP][HAL    ] camxhaldevice.cpp:4009 PrintErrorSummary() + Num Unexpected Output buffer result       : 0
+09-02 12:22:34.121   944   944 I CamX    : [ DUMP][HAL    ] camxhaldevice.cpp:4011 PrintErrorSummary() + Num Unexpected metadata result            : 0
+09-02 12:22:34.121   944   944 I CamX    : [ DUMP][HAL    ] camxhaldevice.cpp:4012 PrintErrorSummary() ==================================================================================
+09-02 12:22:34.121   944   944 I XrCameraHal: XrStreamManager.cpp:teardownStreams: Camera (logical) 6 Camera close() complete
+09-02 12:22:34.121   944   944 I CameraClientManager: [[IOT(920)][ocal]] stream stop completed
+09-02 12:22:34.121   944   944 D CameraStream: [ocal] Client [IOT(920)]: stop complete
+09-02 12:22:34.140  9337 10278 I AutoStationaryHelper: [AutoStationaryHelper::getGuardianDataFromNearbyRoomscale] Checking 1 existing guardian data
+09-02 12:22:34.140  9337 10278 I AutoStationaryHelper: [AutoStationaryHelper::getGuardianDataFromNearbyRoomscale] [1366057508] Distance to HMD: 1.227543
+09-02 12:22:34.267  9143 20619 I [CT]    : MIXEDREALITY: PassthroughApiManager: GetUpdatedLayerState: (every 2 seconds) PT is: ON numLayers: 0
+09-02 12:22:34.379   943 20602 I VD628x  : Flicker results: freq 220.089294, max 220.098373, dcr 44.319958, pct 0.009249, idx 0.002108, conf 0.082707, snr -10.274559, svm 0.006850, sus 0
+09-02 12:22:34.119     0     0 I CAM_INFO: CAM-SENSOR: cam_sensor_driver_cmd: 1270 CAM_RELEASE_DEV Success for imx471 sensor_id:0x471, slave_addr:0x34
+09-02 12:22:34.442     0     0 W healthd : battery l=51 v=3783 t=38.0 h=2 st=2 c=-953270 fc=4562000 cc=154 chg=u
+09-02 12:22:34.501   920  1620 I Tracking: Vega: [INSIGHTS] Mode=DescriptorVega,6DoF,Agg=29s,Inl=14,29,36,Mem=84.9,FrameDur=6.2,14.8,PoseLat=1.5,7.8,CamImuLat=10.3,29.6,Jit=0.0,0.0,Drops(Cam=0,IMU=0),MeanIr=3816.2,Exp(5.0ms,g=5,I=60)(5.0ms,g=5,I=60)(5.3ms,g=5,I=60)(4.8ms,g=4,I=60)(0.0ms,g=0)(0.0ms,g=0),NonInertEnv=n
+09-02 12:22:34.830   920  1624 I Tracking: CONSTELLATION_Left: [Throttled count=89] P+C Left: Applying Consistent Zero Velocity Update during slow motion.
+09-02 12:22:34.833  9837 10671 V MSF.C.MSFCore[@PS]: [Event] MSFPacketStatistics.cpp(300)::DoCheckRequestTimeout->current rtts:67.368
+09-02 12:22:34.919 12631 12752 W MessageExecutionMonitor: Skipping getStackTrace: target thread state RUNNABLE, MQD callback delayed by 0 ms; risk of ART nterp stack-walk SIGSEGV / suspension timeout
+09-02 12:22:34.920  9999 10084 W MessageExecutionMonitor: Skipping getStackTrace: target thread state RUNNABLE, MQD callback delayed by 0 ms; risk of ART nterp stack-walk SIGSEGV / suspension timeout
+09-02 12:22:34.927  9999  9999 D MetaCam (BatteryStatusBroadcastReceiver): Battery level: 51, battery scale: 100, battery status: 2, battery pct: 51.0
+09-02 12:22:35.025  9751 20611 I VrApi   : FPS=90/90,Prd=22ms,Tear=0,Early=0,Stale=0,Stale2/5/10/max=0/0/0/0,VSnc=1,Lat=-4,Fov=0,CPU4/GPU=2/3,1382/492MHz,OC=3F,TA=0/0/0,SP=N/N/N,Mem=2736MHz,Free=2782MB,PLS=0,Temp=38.0C/0.0C,TW=0.68ms,App=2.75ms,GD=0.00ms,CPU&GPU=4.78ms,LCnt=1(DR90,LM0),GPU%=0.32,CPU%=0.15(W0.18),CFL=10.91/14.18,ICFLp95=12.90,LD=0,CABC=1,SF=1.00,LP=1,DVFS=0,Preempt=230,PoseAgeP95=0.00
+09-02 12:22:35.025  9751 20611 I VrApi   : ASW=0,Type=PTWFromStereo,E=0.000/0.000,D=0.000/0.000
+09-02 12:22:35.082  1024  1024 I crcs    : crcs::subscriber::app_pressure: AppPressureSubscriber: broadcasting pressure cpu=0.8 gpu=0.0 mem=0.0
+09-02 12:22:35.097  1239  1609 I MRSS    : MIXEDREALITY: MrService: renderIteration: (every 10 seconds), screen is: ON, PT is: OFF, Depth is: OFF
+09-02 12:22:35.102  8837 11134 D BluetoothVolumeControl: getConnectionState(XX:XX:XX:XX:93:60)
+09-02 12:22:35.150   943 20602 I VD628x  : Flicker results: freq 220.089294, max 220.176102, dcr 44.897995, pct 0.006905, idx 0.002108, conf 0.073967, snr -10.752077, svm 0.007053, sus 0
+09-02 12:22:35.244  9337 10278 I AutoStationaryHelper: [AutoStationaryHelper::getGuardianDataFromNearbyRoomscale] Checking 1 existing guardian data
+09-02 12:22:35.245  9337 10278 I AutoStationaryHelper: [AutoStationaryHelper::getGuardianDataFromNearbyRoomscale] [1366057508] Distance to HMD: 1.227214
+09-02 12:22:35.460   944  2175 I libcamerahal: [INSIGHTS][2.00s] recv/ret/req heartbeat: cam0: 90/90/0, cam1: 90/90/0, cam2: 90/90/0, cam3: 90/90/0
+09-02 12:22:35.506   943 20603 D libflickersensor: Recording telemetry for aggregation period of 30.0 seconds
+09-02 12:22:35.528  9143 20619 I LayerRender: Explicit geometry layer count: 0, in slice 1
+09-02 12:22:35.610  9143  9300 I FaceEyeTrackingServerManager_Impl: [FaceEyeTrackingServerManager] - orthofitManager is NULL.
+09-02 12:22:35.611  9337 10278 I [CT]    : SP:AF:AnchorFramework: calculateRigidScenePose: Located 16 / 16 anchors in 21694a16-6585-f9c2-5cc5-062bd29a1071 for calculating rigid scene pose for com.oculus.guardian
+09-02 12:22:35.611  9337 10278 I [CT]    : SP:AF:AnchorAccuracy: New Rigid Scene calculated using 16 anchors attached to 2 IAs. 0.12215422999997827 seconds since last update
+09-02 12:22:35.611  9337 10278 I [CT]    : SP:AF:AnchorAccuracy: Translation difference (mean/min/max): 0.06997999351006001 0.013586034998297691 0.10182163119316101
+09-02 12:22:35.611  9337 10278 I [CT]    : SP:AF:AnchorAccuracy: Rotation difference (mean/min/max): 0.036322785264928825 0.0033942877780646086 0.04199967905879021
+09-02 12:22:35.611  9337 10278 I [CT]    : SP:AF:AnchorAccuracy: New scene origin pose: 0.761925220489502 -0.5858578085899353 4.864100933074951 : 0.49035942554473877 -0.490359365940094 -0.5094581842422485 -0.5094581842422485
+09-02 12:22:35.611  9337 10278 I [CT]    : SP:AF:AnchorAccuracy: New scene origin pose moved: 3.996623490820639e-06 translation 1.0323827126512697e-07 rotation
+09-02 12:22:35.745  9143 20619 I [CT]    : PTApiClients: 1/1:com.oculus.vrshell,PT=1,EnvDepth=0,VrMode=1,LCnt=0/2(rec=0,proj=0,bg=0),SppMeshes=1(vs=4,ts=2),SppInst=1(vs=4,ts=2),NS=0,Sty=0
+09-02 12:22:35.762   920  1624 I Tracking: CONSTELLATION_Right: [Throttled count=90] P+C Right: Applying Consistent Zero Velocity Update during slow motion.
+09-02 12:22:35.827   920 19123 I Tracking: BOLT:HexagonTelemetry: Global DSP utilization: 2.43% (121 / 5003 ms), Scalar Util: 46.66%, HVX Util: 60.39%, HMX Util: 6.17%, DMA Active: 0.00%, Freq: 1171.2 MHz, GetPmu: 0.28 ms
+09-02 12:22:35.827   920 19123 I Tracking: boltlib: DSP Rpc stats over 5003 ms: {"HexagonPyramid3x3Async":58,"controller_inference":25}
+09-02 12:22:35.833  9837 10671 V MSF.C.MSFCore[@PS]: [Event] MSFPacketStatistics.cpp(300)::DoCheckRequestTimeout->current rtts:67.368
+09-02 12:22:35.902   943 20602 I VD628x  : Flicker results: freq 158.458786, max 158.458786, dcr 44.205780, pct 0.016495, idx 0.003204, conf 0.090709, snr -9.749067, svm 0.009999, sus 0
+09-02 12:22:35.925   944 19134 I SyncBossHAL: [info   ] syncboss_hal_input_controller.c(125): 848de4907efb503d: IMU 0 missed/60000 expected (PER 0.00%), 0 max consecutive drops
+09-02 12:22:36.025  9751 20611 I VrApi   : FPS=91/90,Prd=22ms,Tear=0,Early=0,Stale=0,Stale2/5/10/max=0/0/0/0,VSnc=1,Lat=-4,Fov=0,CPU4/GPU=2/3,1382/492MHz,OC=3F,TA=0/0/0,SP=N/N/N,Mem=2736MHz,Free=2782MB,PLS=0,Temp=38.0C/0.0C,TW=0.67ms,App=2.80ms,GD=0.00ms,CPU&GPU=5.49ms,LCnt=1(DR91,LM0),GPU%=0.33,CPU%=0.17(W0.18),CFL=10.90/14.47,ICFLp95=13.04,LD=0,CABC=1,SF=1.00,LP=1,DVFS=0,Preempt=238,PoseAgeP95=0.00
+09-02 12:22:36.025  9751 20611 I VrApi   : ASW=0,Type=PTWFromStereo,E=0.000/0.000,D=0.000/0.000
+09-02 12:22:36.083  9837 10702 V MSF.C.MSFCore[@DD]: [Event] MSFDDNetworkEngine.cpp(179)::onTcpInfoUpdate->onTcpInfoUpdate:
+09-02 12:22:36.083  9837 10702 V MSF.C.MSFCore[@DD]:                      tcpi_state = 1;
+09-02 12:22:36.083  9837 10702 V MSF.C.MSFCore[@DD]:                      tcpi_ca_state = 0;
+09-02 12:22:36.083  9837 10702 V MSF.C.MSFCore[@DD]:                      tcpi_rto = 356 ms;
+09-02 12:22:36.083  9837 10702 V MSF.C.MSFCore[@DD]:                      tcpi_unacked = 0;
+09-02 12:22:36.083  9837 10702 V MSF.C.MSFCore[@DD]:                      tcpi_rttcur = 79 ms;
+09-02 12:22:36.083  9837 10702 V MSF.C.MSFCore[@DD]:                      tcpi_rttvar = 45 ms;
+09-02 12:22:36.083  9837 10702 V MSF.C.MSFCore[@DD]:                      tcpi_bytes_retrans = 1313 bytes;
+09-02 12:22:36.083  9837 10702 V MSF.C.MSFCore[@DD]:                      tcpi_notsent_bytes = 0 bytes;
+09-02 12:22:36.083  9837 10702 V MSF.C.MSFCore[@DD]:                      tcpi_bytes_received = 192667 bytes;
+09-02 12:22:36.083  9837 10702 V MSF.C.MSFCore[@DD]:                      tcpi_bytes_sent = 30128 bytes
+09-02 12:22:36.083  9837 10702 V MSF.C.MSFCore[@DD]:                      tcpi_last_data_sent = 14854 ms
+09-02 12:22:36.083  9837 10702 V MSF.C.MSFCore[@DD]:                      tcpi_last_data_recv = 7844 ms
+09-02 12:22:36.268  9143 20619 I [CT]    : MIXEDREALITY: PassthroughApiManager: GetUpdatedLayerState: (every 2 seconds) PT is: ON numLayers: 0
+09-02 12:22:36.347  9337 10278 I AutoStationaryHelper: [AutoStationaryHelper::getGuardianDataFromNearbyRoomscale] Checking 1 existing guardian data
+09-02 12:22:36.347  9337 10278 I AutoStationaryHelper: [AutoStationaryHelper::getGuardianDataFromNearbyRoomscale] [1366057508] Distance to HMD: 1.227095
+09-02 12:22:36.498  8112  8112 I binder:8112_4: type=1400 audit(0.0:2703): avc:  denied  { add_name } for  name="globalAlert" scontext=u:r:netd:s0 tcontext=u:object_r:proc_net:s0 tclass=dir permissive=1
+09-02 12:22:36.498  8112  8112 I binder:8112_4: type=1400 audit(0.0:2704): avc:  denied  { create } for  name="globalAlert" scontext=u:r:netd:s0 tcontext=u:object_r:proc_net:s0 tclass=file permissive=1
+09-02 12:22:36.522 13252 13460 D TrafficStats: tagSocket(100) with statsTag=0xffffffff, statsUid=-1
+09-02 12:22:36.523 13252 13460 D TrafficStats: tagSocket(140) with statsTag=0xffffffff, statsUid=-1
+09-02 12:22:36.555   920 19323 I Tracking: CONSTELLATION:IMU_STATUS: 0x848de4907efb503d (R): [#Samples=2525] 596.152s | [FusionTracked=1.000, OutputTracked=1.000, OutputValid=1.000] [AccelSat=0.000, GyroSat=0.000] [AccelMinMeanMax: X=6.084|6.115|6.155, Y=4.963|4.991|5.018, Z=-5.410|-5.380|-5.354] [GyroMinMeanMax: X=-0.006|-0.001|0.004, Y=-0.006|-0.001|0.006, Z=-0.011|-0.004|0.002] [AccelStuck: X=0|0.000, Y=0|0.000, Z=0|0.000] [GyroStuck: X=0|0.000, Y=0|0.000, Z=0|0.000]  [Current time=596.152s, last log time=591.151s]
+09-02 12:22:36.556   920  1624 I Tracking: CONSTELLATION:VISION_STATUS: 0x848de4907efb503d (R): [#Samples=75] 596.136s | BlobDetection:[#BlobsDetected=(29.09, 0.51)]Matching:[MatchSuccess=1.000, MatchCost=(0.00136, 0.00000), #MatchedBlobs=(23.97, 0.03), #MatchedLeds=(8.00, 0.00), RematchM=1.000, SkipRefine=0.000] MatchMethod:[Prox=0.000, ConstBrute=1.000, AttiBrute=0.000, UnconstBrute=0.000] MatchResets[AnomBlobSize=0.000, SharedMatch=0.000, DenseReacq=0.000] | Fusion:[FusionError=0.000, ImuFromCamMs=(-594651.609, 2148845.366), RematchF=0.000] FusionUpdates:[Successful=0.000, Reliable=0.000, TightFusion=0.000, FullPose=0.000, StaticPrior=0.000, StaticForHandTrans=0.000, PoseUpdateMD=(0.0000, 0.0000)] FusionResets[6DoFReset=0.000, ResetSuccess=0.000] FusionStatus[HasPosition=0.000, HasVelocity=0.000]  [Current time=596.136s, last log time=591.069s]
+09-02 12:22:36.556   920  1624 I Tracking: CONSTELLATION:VISION_STATUS: 0xcc2ed85ec848d4ca (L): [#Samples=75] 596.136s | BlobDetection:[#BlobsDetected=(29.09, 0.51)]Matching:[MatchSuccess=0.907, MatchCost=(0.00038, 0.00000), #MatchedBlobs=(4.63, 2.66), #MatchedLeds=(4.60, 2.61), RematchM=0.867, SkipRefine=0.000] MatchMethod:[Prox=0.000, ConstBrute=0.907, AttiBrute=0.000, UnconstBrute=0.000] MatchResets[AnomBlobSize=0.000, SharedMatch=0.000, DenseReacq=0.000] | Fusion:[FusionError=0.000, ImuFromCamMs=(-594651.609, 2148845.366), RematchF=0.000] FusionUpdates:[Successful=0.000, Reliable=0.000, TightFusion=0.000, FullPose=0.000, StaticPrior=0.000, StaticForHandTrans=0.000, PoseUpdateMD=(0.0000, 0.0000)] FusionResets[6DoFReset=0.000, ResetSuccess=0.000] FusionStatus[HasPosition=0.000, HasVelocity=0.000]  [Current time=596.136s, last log time=591.069s]
+09-02 12:22:36.564   920 19323 I Tracking: CONSTELLATION:IMU_STATUS: 0xcc2ed85ec848d4ca (L): [#Samples=2527] 596.161s | [FusionTracked=1.000, OutputTracked=1.000, OutputValid=1.000] [AccelSat=0.000, GyroSat=0.000] [AccelMinMeanMax: X=-5.935|-5.896|-5.865, Y=4.933|4.964|4.998, Z=-5.933|-5.889|-5.855] [GyroMinMeanMax: X=-0.004|0.002|0.009, Y=-0.009|-0.002|0.004, Z=-0.006|0.001|0.006] [AccelStuck: X=0|0.000, Y=0|0.000, Z=0|0.000] [GyroStuck: X=0|0.000, Y=0|0.000, Z=0|0.000]  [Current time=596.161s, last log time=591.159s]
+09-02 12:22:36.651   943 20602 I VD628x  : Flicker results: freq 158.150116, max 158.150116, dcr 40.165176, pct 0.022004, idx 0.004708, conf 0.167056, snr -6.517103, svm 0.014226, sus 0
+09-02 12:22:36.661 10593 22287 I SurvivalState: getAppMemory, com.tencent.mobileqq, 400059
+09-02 12:22:36.682  9837 10521 D MSF.C.DeepSleepDetector: [run] count after++: 6
+09-02 12:22:36.690 10593 22287 I SurvivalState: getAppMemory, com.tencent.mobileqq:MSF, 158548
+09-02 12:22:36.701 10593 22287 I SurvivalState: getAppCpu, com.tencent.mobileqq, 0.0
+09-02 12:22:36.712 10593 22287 I SurvivalState: getAppCpu, com.tencent.mobileqq:MSF, 0.0
+09-02 12:22:36.713 10593 22287 D SurvivalState: processDeepBackState, {param_ProductVersion=537344683, appCpu=0.0, param_FailCode=0, mainJavaRatio=0.034362793, mainCpu=0.0017088759, appPss=558607, param_reportTime=2243202, backTime=300, mainPss=400334}
+09-02 12:22:36.721  9837 10439 D TrafficStats: tagSocket(214) with statsTag=0xffffffff, statsUid=-1
+09-02 12:22:36.757  8226  8401 D TrafficStats: tagSocket(655) with statsTag=0xffffff41, statsUid=-1
+09-02 12:22:36.834  8226  8401 D SntpClient: round trip: 75ms, clock offset: -1319ms
+09-02 12:22:36.834  9837 10671 V MSF.C.MSFCore[@PS]: [Event] MSFPacketStatistics.cpp(300)::DoCheckRequestTimeout->current rtts:67.368
+09-02 12:22:36.863   920  1624 I Tracking: CONSTELLATION_Left: [Throttled count=90] P+C Left: Applying Consistent Zero Velocity Update during slow motion.
+09-02 12:22:37.025  9751 20611 I VrApi   : FPS=90/90,Prd=22ms,Tear=0,Early=0,Stale=0,Stale2/5/10/max=0/0/0/0,VSnc=1,Lat=-4,Fov=0,CPU4/GPU=2/3,1382/492MHz,OC=3F,TA=0/0/0,SP=N/N/N,Mem=2092MHz,Free=2782MB,PLS=0,Temp=38.0C/0.0C,TW=0.61ms,App=2.72ms,GD=0.00ms,CPU&GPU=5.35ms,LCnt=1(DR90,LM0),GPU%=0.32,CPU%=0.17(W0.18),CFL=10.87/14.60,ICFLp95=13.09,LD=0,CABC=1,SF=1.00,LP=1,DVFS=0,Preempt=230,PoseAgeP95=0.00
+09-02 12:22:37.025  9751 20611 I VrApi   : ASW=0,Type=PTWFromStereo,E=0.000/0.000,D=0.000/0.000
+09-02 12:22:37.049  9837 10671 V MSF.C.MSFCore[@DD]: [Event] MSFQuicConnect.cpp(1093)::operator()->[quic] connId:8, isSideWayConn:1, writeBufferSize:0, connection stats:{"address_validated_via_decrypting_packet":false,"address_validated_via_token":false,"blocked_frames_received":0,"blocked_frames_sent":0,"bytes_received":230487,"bytes_retransmitted":4250,"bytes_sent":168642,"bytes_spuriously_retransmitted":4250,"cid":"f5cb49e2324d90f2","close_code":-1,"close_msg":"","close_type":-1,"commit_id":"49457545","connect_duration_ms":21,"create_stream_count":0,"crypto_retransmit_count":0,"egress_mtu":1350,"estimated_bandwidth":"2783.23 kbits/s (347.90 kbytes/s)","estimated_bandwidth_kbytes":347,"handshake_count":1,"handshake_in_progress_count":0,"hit_disk_cache":false,"hit_memory_cache":true,"host":"120.232.31.239","ingress_mtu":1350,"key_update_count":0,"library_version":"0.7.0","loss_timeout_count":0,"max_egress_mtu":1350,"max_sequence_reordering":0,"max_time_reordering_us":0,"min_rtt_us":14137,"num_ack_aggregation_epochs":0,"num_coalesced_p_processed":0,"num_coalesced_p_received":0,"num_conn_probing_recd":0,"num_failed_auth_packets_recd":0,"p_spuriously_detected_lost":0,"p_spuriously_retransmitted":6,"packets_discarded":0,"packets_dropped":0,"packets_lost":0,"packets_processed":482,"packets_received":482,"packets_reordered":0,"packets_retransmitted":6,"packets_sent":378,"ping_frames_sent":36,"pto_count":0,"reorder_timeout_count":0,"retry_packet_processed":false,"rto_count":6,"scene_id":0,"sent_legacy_v_encapsulated_p":0,"server_ip":"120.232.31.239","slowstart_bytes_lost":0,"slowstart_bytes_sent":0,"slowstart_count":0,"slowstart_duration":0,"slowstart_num_rtts":0,"slowstart_packets_lost":0,"slowstart_packets_sent":378,"srtt_us":134290,"stream_bytes_received":214765,"stream_bytes_sent":0,"tcp_loss_events":0,"tlp_count":5,"tls_0_rtt_p_recd_af_dis_decry":0,"total_loss_detection_rsp_time":0.0,"undecry_p_recd_bf_hs_complete":0}
+09-02 12:22:37.394   943 20602 I VD628x  : Flicker results: freq 158.535904, max 158.535904, dcr 40.977917, pct 0.020500, idx 0.003538, conf 0.153166, snr -7.020010, svm 0.013929, sus 0
+09-02 12:22:37.452  9337 10278 I AutoStationaryHelper: [AutoStationaryHelper::getGuardianDataFromNearbyRoomscale] Checking 1 existing guardian data
+09-02 12:22:37.452  9337 10278 I AutoStationaryHelper: [AutoStationaryHelper::getGuardianDataFromNearbyRoomscale] [1366057508] Distance to HMD: 1.227202
+09-02 12:22:37.461   944  2175 I libcamerahal: [INSIGHTS][2.00s] recv/ret/req heartbeat: cam0: 90/91/0, cam1: 91/91/0, cam2: 90/90/0, cam3: 91/91/0
+09-02 12:22:37.472   944 19134 I SyncBossHAL: [info   ] syncboss_hal_input_controller.c(125): cc2ed85ec848d4ca: IMU 0 missed/60000 expected (PER 0.00%), 0 max consecutive drops
+09-02 12:22:37.534   920  1620 I Tracking: Vega: [INSIGHTS] Mode=DescriptorVega,6DoF,Agg=32s,Inl=14,29,36,Mem=85.0,FrameDur=6.1,14.8,PoseLat=1.5,7.8,CamImuLat=10.2,29.6,Jit=0.0,0.0,Drops(Cam=0,IMU=0),MeanIr=3682.2,Exp(5.0ms,g=5,I=60)(5.0ms,g=5,I=60)(5.3ms,g=5,I=59)(4.8ms,g=4,I=60)(0.0ms,g=0)(0.0ms,g=0),NonInertEnv=n
+09-02 12:22:37.763   920  1624 I Tracking: CONSTELLATION_Right: [Throttled count=88] P+C Right: Applying Consistent Zero Velocity Update during slow motion.
+09-02 12:22:37.834  9837 10671 V MSF.C.MSFCore[@PS]: [Event] MSFPacketStatistics.cpp(300)::DoCheckRequestTimeout->current rtts:67.368
+09-02 12:22:37.902  1239  1635 I MRSS    : BOLT:HexagonTelemetry: Global DSP utilization: 2.42% (121 / 5002 ms), Scalar Util: 46.70%, HVX Util: 60.40%, HMX Util: 6.18%, DMA Active: 0.00%, Freq: 1171.2 MHz, GetPmu: 0.32 ms
+09-02 12:22:37.902  1239  1635 I MRSS    : boltlib: DSP Rpc stats over 5002 ms: null
+09-02 12:22:38.025  9751 20611 I VrApi   : FPS=90/90,Prd=22ms,Tear=0,Early=0,Stale=0,Stale2/5/10/max=0/0/0/0,VSnc=1,Lat=-4,Fov=0,CPU4/GPU=2/3,1382/492MHz,OC=3F,TA=0/0/0,SP=N/N/N,Mem=2092MHz,Free=2782MB,PLS=0,Temp=38.0C/0.0C,TW=0.61ms,App=2.73ms,GD=0.00ms,CPU&GPU=5.55ms,LCnt=1(DR90,LM0),GPU%=0.32,CPU%=0.16(W0.16),CFL=10.83/14.18,ICFLp95=12.84,LD=0,CABC=1,SF=1.00,LP=1,DVFS=0,Preempt=240,PoseAgeP95=0.00
+09-02 12:22:38.025  9751 20611 I VrApi   : ASW=0,Type=PTWFromStereo,E=0.000/0.000,D=0.000/0.000
+09-02 12:22:38.140   943 20602 I VD628x  : Flicker results: freq 158.531448, max 158.531448, dcr 41.576118, pct 0.018009, idx 0.002909, conf 0.141251, snr -7.497143, svm 0.013437, sus 0
+09-02 12:22:38.268  9143 20619 I [CT]    : MIXEDREALITY: PassthroughApiManager: GetUpdatedLayerState: (every 2 seconds) PT is: ON numLayers: 0
